@@ -4,6 +4,7 @@ import '../resident/resident_dashboard.dart';
 import '../guard/guard_dashboard.dart';
 import '../admin/admin_dashboard.dart';
 import 'register_screen.dart';
+import '../../services/google_auth_service.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   bool isLoading = false;
 
@@ -79,7 +81,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 : ElevatedButton(
                     onPressed: loginUser,
                     child: const Text("Login"),
-                  ),
+                  ), ElevatedButton(
+  onPressed: () async {
+    setState(() => isLoading = true);
+    try {
+      print("🔵 Starting Google Sign-In...");
+      final user = await _googleAuthService.signInWithGoogle();
+
+      print("✅ User: $user");
+      if (user != null) {
+        print("✅ Google Login Successful! Navigating...");
+        
+        // Default to resident dashboard (GoogleAuthService sets role as "resident")
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ResidentDashboard()),
+        );
+      } else {
+        print("⚠️ User is null");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Google Sign-In cancelled")),
+        );
+      }
+    } catch (e) {
+      print("❌ Google Sign-In Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  },
+  child: const Text("Sign in with Google"),
+), 
                   TextButton(
   onPressed: () {
     Navigator.push(
