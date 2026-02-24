@@ -40,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "email": emailController.text.trim(),
         "role": selectedRole,
         "flatNo": flatController.text.trim(),
-        "status": selectedRole == "resident" ? "pending" : "approved",
+        "status": "pending",
         "createdAt": Timestamp.now(),
       });
 
