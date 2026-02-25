@@ -10,15 +10,12 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  final AdminService _adminService = AdminService();
   int _selectedTab = 0;
 
   // Light theme colors
   static const Color bgLight = Color(0xFFF8F9FA);
   static const Color cardWhite = Color(0xFFFFFFFF);
   static const Color primaryIndigo = Color(0xFF6366F1);
-  static const Color approveGreen = Color(0xFF10B981);
-  static const Color rejectRed = Color(0xFFEF4444);
   static const Color textDark = Color(0xFF1F2937);
   static const Color textLight = Color(0xFF6B7280);
   static const Color borderGray = Color(0xFFE5E7EB);
