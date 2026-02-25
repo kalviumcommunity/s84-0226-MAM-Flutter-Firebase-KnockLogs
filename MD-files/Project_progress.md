@@ -1,4 +1,4 @@
-# Project Progress Log
+# Project Progress
 
 This document tracks the daily progress and steps followed in the development of the KnockLogs application.
 
@@ -28,9 +28,3 @@ This document tracks the daily progress and steps followed in the development of
 - Implemented Google Sign-In logic in `AuthService` (handling credential retrieval and Firebase authentication).
 
 ---
-
-# Daily Work Log
-
-## [Current Date]
-- Documented project setup steps.
-- Validated folder structure.
