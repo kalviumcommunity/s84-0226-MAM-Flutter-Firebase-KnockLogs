@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final flatController = TextEditingController();
+  final phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   String selectedRole = "resident";
@@ -64,10 +65,22 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Future<void> registerUser() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all required fields")),
+      );
+      return;
+    }
+
     try {
       setState(() {
         isLoading = true;
       });
+
+      // Validate phone number is not empty
+      if (phoneController.text.trim().isEmpty) {
+        throw Exception("Phone number is required");
+      }
 
       // Create user in Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance
@@ -82,6 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
         "name": nameController.text.trim(),
         "email": emailController.text.trim(),
+        "phone": phoneController.text.trim(),
         "role": selectedRole,
         "flatNo": flatController.text.trim(),
         "status": "pending",
@@ -279,6 +293,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                         hint: 'Enter your full name',
                         icon: Icons.person_outline_rounded,
                         theme: theme,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Full name is required';
+                          }
+                          if (value.length < 2) {
+                            return 'Name must be at least 2 characters';
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -291,6 +314,17 @@ class _RegisterScreenState extends State<RegisterScreen>
                         icon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         theme: theme,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email is required';
+                          }
+                          if (!RegExp(
+                                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                              .hasMatch(value)) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -316,6 +350,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                             });
                           },
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -327,6 +370,33 @@ class _RegisterScreenState extends State<RegisterScreen>
                         hint: 'e.g., A-101',
                         icon: Icons.home_outlined,
                         theme: theme,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Flat number is required';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Phone Number Field
+                      _buildTextField(
+                        controller: phoneController,
+                        label: 'Phone Number',
+                        hint: 'e.g., +1-234-567-8900',
+                        icon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                        theme: theme,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Phone number is required';
+                          }
+                          if (value.length < 7) {
+                            return 'Please enter a valid phone number';
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -631,6 +701,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     bool obscureText = false,
     TextInputType? keyboardType,
     Widget? suffixIcon,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,10 +727,11 @@ class _RegisterScreenState extends State<RegisterScreen>
               ),
             ],
           ),
-          child: TextField(
+          child: TextFormField(
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
+            validator: validator,
             style: TextStyle(color: theme.textColor),
             decoration: InputDecoration(
               hintText: hint,
@@ -675,6 +747,10 @@ class _RegisterScreenState extends State<RegisterScreen>
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 16,
+              ),
+              errorStyle: TextStyle(
+                color: Colors.red.shade400,
+                fontSize: 12,
               ),
             ),
           ),

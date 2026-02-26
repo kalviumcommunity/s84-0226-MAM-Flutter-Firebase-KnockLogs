@@ -22,13 +22,40 @@ class GuardService {
 
       Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
 
+      // Check if user is actually a resident (not a guard)
+      if (residentData['role'] != 'resident') {
+        return {
+          "valid": false,
+          "reason": "QR code is not from a resident",
+          "resident_id": residentId,
+          "resident_name": residentData['name'] ?? "Unknown",
+          "resident_phone": residentData['phone'] ?? "Not provided",
+          "resident_email": residentData['email'] ?? "Unknown",
+          "flat_number": residentData['flatNo'] ?? "Unknown",
+        };
+      }
+
       // Check if resident is approved
       if (residentData['status'] != 'approved') {
         return {
           "valid": false,
           "reason": "Resident not approved",
           "resident_id": residentId,
+          "resident_name": residentData['name'] ?? "Unknown",
+          "resident_phone": residentData['phone'] ?? "Not provided",
+          "resident_email": residentData['email'] ?? "Unknown",
+          "flat_number": residentData['flatNo'] ?? "Unknown",
         };
+      }
+
+      // Ensure phone field exists (migration for old users)
+      String phoneNumber = residentData['phone'] ?? "";
+      if (phoneNumber.isEmpty) {
+        phoneNumber = "Not provided";
+        // Update in Firestore for future use
+        await _firestore.collection("users").doc(residentId).update({
+          "phone": phoneNumber,
+        }).catchError((e) => print("Error updating phone: $e"));
       }
 
       // Check QR session validity
@@ -46,11 +73,17 @@ class GuardService {
       }
 
       if (!qrValid) {
+        String phoneNum = residentData['phone'] ?? "";
+        if (phoneNum.isEmpty) phoneNum = "Not provided";
+        
         return {
           "valid": false,
           "reason": "Invalid or already used QR code",
           "resident_id": residentId,
           "resident_name": residentData['name'] ?? "Unknown",
+          "resident_phone": phoneNum,
+          "resident_email": residentData['email'] ?? "Unknown",
+          "flat_number": residentData['flatNo'] ?? "Unknown",
         };
       }
 
@@ -58,13 +91,16 @@ class GuardService {
       String entryType = await _determineEntryType(residentId);
 
       // QR is valid - return resident info
+      String phoneNum = residentData['phone'] ?? "";
+      if (phoneNum.isEmpty) phoneNum = "Not provided";
+      
       return {
         "valid": true,
         "resident_id": residentId,
         "resident_name": residentData['name'] ?? "Unknown",
         "resident_email": residentData['email'] ?? "Unknown",
-        "resident_phone": residentData['phone'] ?? "Unknown",
-        "flat_number": residentData['flat_number'] ?? "Unknown",
+        "resident_phone": phoneNum,
+        "flat_number": residentData['flatNo'] ?? "Unknown",
         "qr_id": qrId,
         "qr_created_at": parts[2],
         "entry_type": entryType,
@@ -256,6 +292,58 @@ class GuardService {
           .toList();
     } catch (e) {
       throw Exception("Error fetching scan history: $e");
+    }
+  }
+
+  // Delete logs for a specific day
+  Future<int> deleteLogsForDay(String guardId, DateTime date) async {
+    try {
+      // Create start and end timestamps for the day
+      DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+      DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+      // Query all logs for that day
+      QuerySnapshot snapshot = await _firestore
+          .collection("guards")
+          .doc(guardId)
+          .collection("scan_logs")
+          .where("timestamp", isGreaterThanOrEqualTo: startOfDay)
+          .where("timestamp", isLessThanOrEqualTo: endOfDay)
+          .get();
+
+      int deletedCount = 0;
+
+      // Delete each log
+      for (var doc in snapshot.docs) {
+        await doc.reference.delete();
+        deletedCount++;
+      }
+
+      return deletedCount;
+    } catch (e) {
+      throw Exception("Error deleting logs: $e");
+    }
+  }
+
+  // Delete all logs
+  Future<int> deleteAllLogs(String guardId) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection("guards")
+          .doc(guardId)
+          .collection("scan_logs")
+          .get();
+
+      int deletedCount = 0;
+
+      for (var doc in snapshot.docs) {
+        await doc.reference.delete();
+        deletedCount++;
+      }
+
+      return deletedCount;
+    } catch (e) {
+      throw Exception("Error deleting all logs: $e");
     }
   }
 }

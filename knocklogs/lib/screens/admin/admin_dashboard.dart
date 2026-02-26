@@ -11,6 +11,8 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   int _selectedTab = 0;
+  final GlobalKey<_GuardsTabState> _guardsTabKey = GlobalKey();
+  final GlobalKey<_ResidentsTabState> _residentsTabKey = GlobalKey();
 
   // Light theme colors
   static const Color bgLight = Color(0xFFF8F9FA);
@@ -27,10 +29,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
       appBar: _buildAppBar(),
       body: IndexedStack(
         index: _selectedTab,
-        children: const [
-          PendingRequestsTab(),
-          GuardsTab(),
-          ResidentsTab(),
+        children: [
+          const PendingRequestsTab(),
+          GuardsTab(key: _guardsTabKey),
+          ResidentsTab(key: _residentsTabKey),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(),
@@ -83,6 +85,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
         currentIndex: _selectedTab,
         onTap: (index) {
           setState(() => _selectedTab = index);
+          // Refresh the lists when switching tabs
+          if (index == 1) {
+            _guardsTabKey.currentState?._loadGuards();
+          } else if (index == 2) {
+            _residentsTabKey.currentState?._loadResidents();
+          }
         },
         elevation: 0,
         items: const [
@@ -489,16 +497,28 @@ class _GuardsTabState extends State<GuardsTab> {
       children: [
         _buildSearchBar(),
         Expanded(
-          child: _filteredGuards.isEmpty
-              ? _buildEmptyState("No guards found", Icons.person_off)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _filteredGuards.length,
-                  itemBuilder: (context, index) {
-                    final guard = _filteredGuards[index];
-                    return _buildUserCard(guard);
-                  },
-                ),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _loadGuards();
+            },
+            child: _filteredGuards.isEmpty
+                ? ListView(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: _buildEmptyState("No guards found", Icons.person_off),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _filteredGuards.length,
+                    itemBuilder: (context, index) {
+                      final guard = _filteredGuards[index];
+                      return _buildUserCard(guard);
+                    },
+                  ),
+          ),
         ),
       ],
     );
@@ -738,16 +758,28 @@ class _ResidentsTabState extends State<ResidentsTab> {
       children: [
         _buildSearchBar(),
         Expanded(
-          child: _filteredResidents.isEmpty
-              ? _buildEmptyState("No residents found", Icons.person_off)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _filteredResidents.length,
-                  itemBuilder: (context, index) {
-                    final resident = _filteredResidents[index];
-                    return _buildUserCard(resident);
-                  },
-                ),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _loadResidents();
+            },
+            child: _filteredResidents.isEmpty
+                ? ListView(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: _buildEmptyState("No residents found", Icons.person_off),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _filteredResidents.length,
+                    itemBuilder: (context, index) {
+                      final resident = _filteredResidents[index];
+                      return _buildUserCard(resident);
+                    },
+                  ),
+          ),
         ),
       ],
     );
@@ -822,6 +854,14 @@ class _ResidentsTabState extends State<ResidentsTab> {
               style: const TextStyle(
                 color: Color(0xFF6B7280),
                 fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              "Phone: ${user['phone'] ?? 'N/A'}",
+              style: const TextStyle(
+                color: Color(0xFF6B7280),
+                fontSize: 12,
               ),
             ),
             const SizedBox(height: 2),

@@ -150,6 +150,93 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
     );
   }
 
+  void _showEditPhoneDialog() {
+    TextEditingController phoneController = TextEditingController(
+      text: _residentInfo?['phone'] ?? "",
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Row(
+          children: [
+            Icon(Icons.phone, color: Color(0xFF6366F1), size: 24),
+            SizedBox(width: 8),
+            Text("Update Phone Number"),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Enter your phone number:",
+                style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: "e.g., +1-234-567-8900",
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (phoneController.text.trim().isEmpty) {
+                _showErrorSnackbar("Please enter a phone number");
+                return;
+              }
+
+              Navigator.pop(context);
+              await _updatePhone(phoneController.text.trim());
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: primaryIndigo.withOpacity(0.1),
+            ),
+            child: const Text(
+              "Update",
+              style: TextStyle(
+                color: Color(0xFF6366F1),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updatePhone(String phone) async {
+    try {
+      await _residentService.updatePhone(phone);
+      setState(() {
+        _residentInfo?['phone'] = phone;
+      });
+      _showSuccessSnackbar("Phone number updated successfully!");
+    } catch (e) {
+      _showErrorSnackbar("Error updating phone: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -413,14 +500,14 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               _residentInfo!['email'] ?? "N/A",
               Icons.email,
             ),
-            _buildDetailRow(
+            _buildDetailRowWithEdit(
               "Phone",
-              _residentInfo!['phone'] ?? "N/A",
+              _residentInfo!['phone'] ?? "Not provided",
               Icons.phone,
             ),
             _buildDetailRow(
               "Flat/Unit",
-              _residentInfo!['flat_number'] ?? "N/A",
+              _residentInfo!['flatNo'] ?? "N/A",
               Icons.home,
             ),
             Container(
@@ -490,6 +577,56 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRowWithEdit(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: primaryIndigo),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: textLight,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _showEditPhoneDialog(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: primaryIndigo.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(
+                Icons.edit,
+                size: 16,
+                color: primaryIndigo,
+              ),
             ),
           ),
         ],
