@@ -93,6 +93,43 @@ class ResidentService {
     }
   }
 
+  // Update resident phone number
+  Future<void> updatePhone(String phone) async {
+    try {
+      String? uid = _auth.currentUser?.uid;
+      if (uid == null) throw Exception("User not authenticated");
+
+      await _firestore.collection("users").doc(uid).update({
+        "phone": phone.trim(),
+      });
+    } catch (e) {
+      throw Exception("Error updating phone: $e");
+    }
+  }
+
+  // Ensure phone field exists and is not empty
+  Future<void> ensurePhoneFieldExists() async {
+    try {
+      String? uid = _auth.currentUser?.uid;
+      if (uid == null) throw Exception("User not authenticated");
+
+      DocumentSnapshot doc = await _firestore.collection("users").doc(uid).get();
+      
+      if (doc.exists) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        
+        // If phone field is missing or empty, add a placeholder
+        if (!data.containsKey("phone") || data["phone"] == null || data["phone"].toString().isEmpty) {
+          await _firestore.collection("users").doc(uid).update({
+            "phone": "Not provided",
+          });
+        }
+      }
+    } catch (e) {
+      print("Error ensuring phone field: $e");
+    }
+  }
+
   // Log access (called when guard validates QR)
   Future<void> logAccess({
     required String qrId,

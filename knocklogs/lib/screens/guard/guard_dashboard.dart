@@ -469,6 +469,235 @@ class _GuardDashboardState extends State<GuardDashboard> {
     );
   }
 
+  void _showDeleteDayLogsDialog(DateTime date) {
+    final formattedDate = DateFormat("EEEE, MMMM d, yyyy").format(date);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 24),
+            SizedBox(width: 8),
+            Text("Delete Logs"),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Are you sure you want to delete all scan logs for:",
+              style: TextStyle(color: textDark, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: dangerRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: dangerRed.withOpacity(0.3)),
+              ),
+              child: Text(
+                formattedDate,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: textDark,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "This action cannot be undone.",
+              style: TextStyle(
+                color: dangerRed,
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteDayLogs(date);
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: dangerRed.withOpacity(0.1),
+            ),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAllLogsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_sweep, color: Color(0xFFEF4444), size: 24),
+            SizedBox(width: 8),
+            Text("Delete All Logs"),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Are you sure you want to delete all scan logs permanently?",
+              style: TextStyle(color: textDark, fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: dangerRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: dangerRed, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "This will delete ALL logs and cannot be undone!",
+                      style: TextStyle(
+                        color: dangerRed,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteAllLogs();
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: dangerRed.withOpacity(0.1),
+            ),
+            child: const Text(
+              "Delete All",
+              style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteDayLogs(DateTime date) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: SizedBox(
+            height: 100,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text("Deleting logs..."),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      String? guardId = _auth.currentUser?.uid;
+      if (guardId == null) {
+        Navigator.pop(context);
+        _showErrorSnackbar("User not authenticated");
+        return;
+      }
+
+      final deletedCount = await _guardService.deleteLogsForDay(guardId, date);
+
+      Navigator.pop(context);
+
+      setState(() {
+        _loadScanHistory();
+      });
+
+      _showSuccessSnackbar("$deletedCount logs deleted successfully");
+    } catch (e) {
+      Navigator.pop(context);
+      _showErrorSnackbar("Error deleting logs: $e");
+    }
+  }
+
+  Future<void> _deleteAllLogs() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: SizedBox(
+            height: 100,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text("Deleting all logs..."),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      String? guardId = _auth.currentUser?.uid;
+      if (guardId == null) {
+        Navigator.pop(context);
+        _showErrorSnackbar("User not authenticated");
+        return;
+      }
+
+      final deletedCount = await _guardService.deleteAllLogs(guardId);
+
+      Navigator.pop(context);
+
+      setState(() {
+        _loadScanHistory();
+      });
+
+      _showSuccessSnackbar("$deletedCount logs deleted successfully");
+    } catch (e) {
+      Navigator.pop(context);
+      _showErrorSnackbar("Error deleting logs: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -608,17 +837,36 @@ class _GuardDashboardState extends State<GuardDashboard> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.history, color: primaryIndigo, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  "Recent Scans",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: textDark,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.history, color: primaryIndigo, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Recent Scans",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textDark,
+                      ),
+                    ),
+                  ],
                 ),
+                if (_scanHistory.isNotEmpty)
+                  PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        child: const Text("Delete All Logs"),
+                        onTap: () {
+                          Future.delayed(
+                            const Duration(milliseconds: 300),
+                            () => _showDeleteAllLogsDialog(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -631,113 +879,199 @@ class _GuardDashboardState extends State<GuardDashboard> {
                       style: TextStyle(color: textLight, fontSize: 14),
                     ),
                   )
-                : ListView.builder(
-                    itemCount: _scanHistory.length,
-                    itemBuilder: (context, index) {
-                      final log = _scanHistory[index];
-                      final timestamp = (log['timestamp'] as Timestamp).toDate();
-                      final isGranted = log['access_granted'] == true;
-                      final entryType = log['entry_type'] ?? 'IN'; // Default to IN
-
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: bgLight,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: isGranted
-                                    ? successGreen.withOpacity(0.2)
-                                    : dangerRed.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                isGranted
-                                    ? Icons.check_circle
-                                    : Icons.cancel,
-                                color: isGranted ? successGreen : dangerRed,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    log['resident_name'] ?? 'Unknown',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: textDark,
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        DateFormat("HH:mm:ss").format(timestamp),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: textLight,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      if (isGranted)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: entryType == 'IN'
-                                                ? successGreen.withOpacity(0.2)
-                                                : const Color(0xFFEC4899).withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            entryType,
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                              color: entryType == 'IN'
-                                                  ? successGreen
-                                                  : const Color(0xFFEC4899),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              isGranted ? "✓ ALLOWED" : "✗ DENIED",
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isGranted ? successGreen : dangerRed,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                : _buildGroupedLogsList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGroupedLogsList() {
+    // Group logs by date
+    Map<String, List<Map<String, dynamic>>> groupedLogs = {};
+
+    for (var log in _scanHistory) {
+      final timestamp = (log['timestamp'] as Timestamp).toDate();
+      final dateKey = DateFormat("yyyy-MM-dd").format(timestamp);
+      
+      if (!groupedLogs.containsKey(dateKey)) {
+        groupedLogs[dateKey] = [];
+      }
+      groupedLogs[dateKey]!.add(log);
+    }
+
+    // Sort dates in descending order
+    final sortedDates = groupedLogs.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    return ListView.builder(
+      itemCount: sortedDates.length,
+      itemBuilder: (context, index) {
+        final dateKey = sortedDates[index];
+        final logs = groupedLogs[dateKey]!;
+        final dateObj = DateTime.parse(dateKey);
+        final formattedDate = DateFormat("EEEE, MMMM d, yyyy").format(dateObj);
+
+        return Column(
+          children: [
+            // Date Header with Delete Button
+            Container(
+              color: bgLight,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formattedDate,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: textDark,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: primaryIndigo.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          "${logs.length} scans",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: primaryIndigo,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => _showDeleteDayLogsDialog(dateObj),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: dangerRed.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: dangerRed,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Logs for this day
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: logs.length,
+              itemBuilder: (context, logIndex) {
+                final log = logs[logIndex];
+                final timestamp = (log['timestamp'] as Timestamp).toDate();
+                final isGranted = log['access_granted'] == true;
+                final entryType = log['entry_type'] ?? 'IN';
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: bgLight, width: 1),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isGranted
+                              ? successGreen.withOpacity(0.2)
+                              : dangerRed.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isGranted
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: isGranted ? successGreen : dangerRed,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              log['resident_name'] ?? 'Unknown',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: textDark,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  DateFormat("HH:mm:ss").format(timestamp),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: textLight,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (isGranted)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: entryType == 'IN'
+                                          ? successGreen.withOpacity(0.2)
+                                          : const Color(0xFFEC4899).withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      entryType,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: entryType == 'IN'
+                                            ? successGreen
+                                            : const Color(0xFFEC4899),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        isGranted ? "✓ ALLOWED" : "✗ DENIED",
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isGranted ? successGreen : dangerRed,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const Divider(height: 1),
+          ],
+        );
+      },
     );
   }
 }

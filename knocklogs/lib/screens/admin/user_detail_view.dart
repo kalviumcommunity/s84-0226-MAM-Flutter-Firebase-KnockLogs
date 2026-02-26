@@ -393,6 +393,12 @@ class _UserDetailViewState extends State<UserDetailView> {
           value: user['email'] ?? 'N/A',
         ),
         const SizedBox(height: 10),
+        _buildInfoCard(
+          icon: Icons.phone,
+          label: "Phone",
+          value: user['phone'] ?? 'N/A',
+        ),
+        const SizedBox(height: 10),
         if (user['role'] == 'resident')
           _buildInfoCard(
             icon: Icons.home,
