@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:printing/printing.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
 import '../../services/resident_service.dart';
 import '../auth/login_screen.dart';
 
@@ -333,6 +339,10 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
 
               // Today's Summary Card
               _buildTodaysSummaryCard(),
+              const SizedBox(height: 24),
+
+              // Visitor QR Section
+              _buildVisitorQRSection(),
               const SizedBox(height: 24),
 
               // Access History Section
@@ -749,6 +759,655 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               fontWeight: FontWeight.bold,
               color: color,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVisitorQRSection() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: cardWhite,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.people, color: primaryIndigo, size: 24),
+                          const SizedBox(width: 12),
+                          Text(
+                            "Visitor Access",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Generate QR codes for guests",
+                        style: TextStyle(fontSize: 12, color: textLight),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _showAddVisitorDialog,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text("Add Visitor"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryIndigo,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _residentService.getActiveVisitorQRs(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: dangerRed.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      "Error loading visitors",
+                      style: TextStyle(color: dangerRed, fontSize: 12),
+                    ),
+                  );
+                }
+
+                final visitors = snapshot.data ?? [];
+                if (visitors.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: textLight.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: textLight.withOpacity(0.2)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "No active visitor QR codes",
+                        style: TextStyle(
+                          color: textLight,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: List.generate(visitors.length, (index) {
+                    final visitor = visitors[index];
+                    final expiresAt =
+                        (visitor['expires_at'] as Timestamp).toDate();
+                    final timeRemaining =
+                        expiresAt.difference(DateTime.now()).inHours;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: primaryIndigo.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: primaryIndigo.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        visitor['visitor_name'] ?? 'Unknown',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: textDark,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        visitor['visitor_phone'] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: textLight,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: warningorange.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          'Expires: ${DateFormat('hh:mm a').format(expiresAt)} (${timeRemaining}h left)',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: warningorange,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuButton(
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      child: const Row(
+                                        children: [
+                                          Icon(Icons.qr_code, size: 18),
+                                          SizedBox(width: 8),
+                                          Text("View QR"),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        _showVisitorQRDialog(visitor);
+                                      },
+                                    ),
+                                    PopupMenuItem(
+                                      child: const Row(
+                                        children: [
+                                          Icon(Icons.delete, size: 18),
+                                          SizedBox(width: 8),
+                                          Text("Revoke"),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        _revokeVisitorQR(visitor['id']);
+                                      },
+                                    ),
+                                  ],
+                                  offset: const Offset(0, 36),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddVisitorDialog() {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final emailController = TextEditingController();
+    final purposeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 350,
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.person_add, color: Color(0xFF6366F1), size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      "Add Visitor",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildVisitorFormField(
+                  "Name",
+                  nameController,
+                  Icons.person,
+                  "Visitor name",
+                  isRequired: true,
+                ),
+                const SizedBox(height: 12),
+                _buildVisitorFormField(
+                  "Phone",
+                  phoneController,
+                  Icons.phone,
+                  "+1-234-567-8900",
+                ),
+                const SizedBox(height: 12),
+                _buildVisitorFormField(
+                  "Email",
+                  emailController,
+                  Icons.email,
+                  "visitor@example.com",
+                ),
+                const SizedBox(height: 12),
+                _buildVisitorFormField(
+                  "Purpose (Optional)",
+                  purposeController,
+                  Icons.info,
+                  "e.g., Meeting, Delivery",
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (nameController.text.trim().isEmpty) {
+                            _showErrorSnackbar("Please enter visitor name");
+                            return;
+                          }
+
+                          Navigator.pop(context);
+                          await _createVisitorQR(
+                            nameController.text.trim(),
+                            phoneController.text.trim(),
+                            emailController.text.trim(),
+                            purposeController.text.trim(),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryIndigo,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text("Create QR"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVisitorFormField(
+    String label,
+    TextEditingController controller,
+    IconData icon,
+    String hint, {
+    bool isRequired = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isRequired ? "$label *" : label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: textDark,
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, size: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            isDense: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _createVisitorQR(
+    String name,
+    String phone,
+    String email,
+    String purpose,
+  ) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: SizedBox(
+            height: 100,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text("Generating QR code..."),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final qrData = await _residentService.createVisitorQR(
+        visitorName: name,
+        visitorPhone: phone,
+        visitorEmail: email,
+        visitorPurpose: purpose.isEmpty ? "Visit" : purpose,
+      );
+
+      Navigator.pop(context);
+      _showSuccessSnackbar("Visitor QR created successfully!");
+      setState(() {}); // Refresh the visitor list
+      _showVisitorQRDialog({
+        'visitor_name': name,
+        'qr_data': qrData,
+      });
+    } catch (e) {
+      Navigator.pop(context);
+      _showErrorSnackbar("Failed to create visitor QR: $e");
+    }
+  }
+
+  void _showVisitorQRDialog(Map<String, dynamic> visitor) {
+    String qrData = visitor['qr_data'] ?? 'visitor_qr_data';
+    String visitorName = visitor['visitor_name'] ?? 'Visitor';
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 320,
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.qr_code, color: Color(0xFF6366F1), size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      "Visitor QR Code",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  visitorName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textDark,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: 280,
+                  height: 280,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: primaryIndigo, width: 2),
+                  ),
+                  child: QrImageView(
+                    data: qrData,
+                    version: QrVersions.auto,
+                    size: 250.0,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: primaryIndigo.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    "Share this QR code with your visitor",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: primaryIndigo,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          backgroundColor: textLight.withOpacity(0.1),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          "Close",
+                          style: TextStyle(color: textDark),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _shareVisitorQR(qrData, visitorName),
+                        icon: const Icon(Icons.share, size: 18),
+                        label: const Text("Share"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryIndigo,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareVisitorQR(String qrData, String visitorName) async {
+    try {
+      final shareText = '''🔐 VISITOR QR CODE
+
+Visitor: $visitorName
+
+Please scan this QR code at the entrance:
+$qrData
+
+---
+
+Instructions:
+1. Show this message to the guard
+2. Guard will scan the QR code
+3. You'll be granted access
+
+KnockLogs - Secure Entry Management''';
+
+      // For mobile: Generate QR code image and share with file
+      if (!kIsWeb) {
+        try {
+          // Generate QR code image
+          final qrPainter = QrPainter(
+            data: qrData,
+            version: QrVersions.auto,
+            gapless: true,
+          );
+
+          final pictureRecorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(pictureRecorder, Rect.fromLTWH(0, 0, 300, 300));
+          
+          // Draw white background
+          canvas.drawRect(
+            Rect.fromLTWH(0, 0, 300, 300),
+            Paint()..color = Colors.white,
+          );
+
+          // Draw QR code
+          qrPainter.paint(canvas, const Size(300, 300));
+
+          final picture = pictureRecorder.endRecording();
+          final image = await picture.toImage(300, 300);
+          final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+          if (byteData != null) {
+            final directory = await getTemporaryDirectory();
+            final imagePath = '${directory.path}/visitor_qr_${DateTime.now().millisecondsSinceEpoch}.png';
+            final imageFile = File(imagePath);
+
+            // Write PNG file
+            await imageFile.writeAsBytes(byteData.buffer.asUint8List());
+
+            // Share the file
+            await Share.shareXFiles(
+              [XFile(imagePath, mimeType: 'image/png')],
+              subject: 'Visitor QR Code - $visitorName',
+              text: shareText,
+            );
+
+            // Clean up
+            if (await imageFile.exists()) {
+              await imageFile.delete();
+            }
+
+            _showSuccessSnackbar("QR code shared successfully!");
+            return;
+          }
+        } catch (e) {
+          print("Image generation/share failed: $e");
+          // Fall through to text share
+        }
+      }
+
+      // Fallback: Text-only share (web and mobile if image fails)
+      await Share.share(
+        shareText,
+        subject: 'Visitor QR Code - $visitorName',
+      );
+
+      _showSuccessSnackbar("QR code shared successfully!");
+    } catch (e) {
+      _showErrorSnackbar("Error sharing QR: $e");
+    }
+  }
+
+  Future<void> _revokeVisitorQR(String visitorQrId) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Revoke Access"),
+        content: const Text("Are you sure you want to revoke this visitor QR?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _residentService.invalidateVisitorQR(visitorQrId);
+                Navigator.pop(context);
+                _showSuccessSnackbar("Visitor QR revoked successfully!");
+                setState(() {}); // Refresh the visitor list
+              } catch (e) {
+                Navigator.pop(context);
+                _showErrorSnackbar("Failed to revoke QR: $e");
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: dangerRed,
+            ),
+            child: const Text("Revoke"),
           ),
         ],
       ),

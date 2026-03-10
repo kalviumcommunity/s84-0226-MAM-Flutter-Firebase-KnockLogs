@@ -6,6 +6,134 @@ class GuardService {
   // Validate QR and get resident info
   Future<Map<String, dynamic>?> validateQRAndGetResidentInfo(String qrData) async {
     try {
+      // Check if it's a visitor QR
+      List<String> parts = qrData.split("|");
+      if (parts.isNotEmpty && parts[0] == "visitor") {
+        return await _validateVisitorQR(qrData);
+      }
+      
+      // Otherwise validate as resident QR
+      return await _validateResidentQR(qrData);
+    } catch (e) {
+      return {
+        "valid": false,
+        "reason": "Error validating QR: $e",
+      };
+    }
+  }
+
+  // Validate visitor QR
+  Future<Map<String, dynamic>?> _validateVisitorQR(String qrData) async {
+    try {
+      // Format: visitor|residentId|visitorQrId|timestamp
+      List<String> parts = qrData.split("|");
+      if (parts.length < 4) return null;
+
+      String parsedResidentId = parts[1];
+      String visitorQrId = parts[2];
+
+      // First, verify the visitor QR document exists and has matching resident_id
+      DocumentSnapshot visitorQrDoc = await _firestore
+          .collection("residents")
+          .doc(parsedResidentId)
+          .collection("visitor_qr_sessions")
+          .doc(visitorQrId)
+          .get();
+
+      if (!visitorQrDoc.exists) {
+        return {
+          "valid": false,
+          "reason": "Visitor QR not found",
+        };
+      }
+
+      Map<String, dynamic> visitorQrData = visitorQrDoc.data() as Map<String, dynamic>;
+
+      // Validate resident_id from document matches parsed resident_id
+      String docResidentId = visitorQrData['resident_id'] ?? '';
+      if (docResidentId != parsedResidentId) {
+        print("ERROR: Resident ID mismatch! QR: $parsedResidentId, Doc: $docResidentId");
+        return {
+          "valid": false,
+          "reason": "QR validation failed - resident mismatch",
+        };
+      }
+
+      // Check if QR is valid and not expired BEFORE fetching resident info
+      DateTime? expiresAt = (visitorQrData['expires_at'] as Timestamp?)?.toDate();
+      DateTime now = DateTime.now();
+
+      if (!visitorQrData['is_valid'] ||
+          expiresAt == null ||
+          expiresAt.isBefore(now) ||
+          visitorQrData['scanned_at'] != null) {
+        return {
+          "valid": false,
+          "reason": expiresAt?.isBefore(now) ?? false
+              ? "Visitor QR has expired"
+              : "Visitor QR already used or invalid",
+          "is_visitor": true,
+        };
+      }
+
+      // Now fetch resident info using the validated resident_id
+      DocumentSnapshot residentDoc = await _firestore
+          .collection("users")
+          .doc(parsedResidentId)
+          .get();
+
+      if (!residentDoc.exists) {
+        print("ERROR: Resident user document not found for ID: $parsedResidentId");
+        return {
+          "valid": false,
+          "reason": "Resident not found",
+        };
+      }
+
+      Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
+
+      // Check if resident is approved
+      if (residentData['status'] != 'approved') {
+        return {
+          "valid": false,
+          "reason": "Resident not approved",
+        };
+      }
+
+      // Use resident details from visitorQrData if available (as source of truth),
+      // otherwise fall back to users collection data
+      String residentName = visitorQrData['resident_name'] ?? residentData['name'] ?? "Unknown";
+      String residentPhone = visitorQrData['resident_phone'] ?? residentData['phone'] ?? "Not provided";
+      String residentEmail = visitorQrData['resident_email'] ?? residentData['email'] ?? "Unknown";
+      String flatNumber = visitorQrData['flat_number'] ?? residentData['flatNo'] ?? "Unknown";
+
+      return {
+        "valid": true,
+        "is_visitor": true,
+        "resident_id": parsedResidentId,
+        "resident_name": residentName,
+        "resident_phone": residentPhone,
+        "resident_email": residentEmail,
+        "flat_number": flatNumber,
+        "visitor_name": visitorQrData['visitor_name'] ?? "Unknown",
+        "visitor_phone": visitorQrData['visitor_phone'] ?? "",
+        "visitor_email": visitorQrData['visitor_email'] ?? "",
+        "visitor_purpose": visitorQrData['visitor_purpose'] ?? "Visit",
+        "qr_id": visitorQrId,
+        "entry_type": "IN", // Visitors are always IN
+      };
+    } catch (e) {
+      print("ERROR in _validateVisitorQR: $e");
+      return {
+        "valid": false,
+        "reason": "Error validating visitor QR: $e",
+      };
+    }
+  }
+
+  // Validate resident QR
+  Future<Map<String, dynamic>?> _validateResidentQR(String qrData) async {
+    try {
       // QR format: uid|qrId|timestamp
       List<String> parts = qrData.split("|");
       if (parts.length < 3) return null;
@@ -69,7 +197,9 @@ class GuardService {
       bool qrValid = false;
       if (qrDoc.exists) {
         Map<String, dynamic> qrData = qrDoc.data() as Map<String, dynamic>;
-        qrValid = qrData['is_valid'] == true && qrData['scanned_at'] == null;
+        // For resident QRs, only check if QR is valid (not expired, not revoked)
+        // Allow multiple scans for IN/OUT - don't check scanned_at
+        qrValid = qrData['is_valid'] == true;
       }
 
       if (!qrValid) {
@@ -78,7 +208,7 @@ class GuardService {
         
         return {
           "valid": false,
-          "reason": "Invalid or already used QR code",
+          "reason": "Invalid or expired QR code",
           "resident_id": residentId,
           "resident_name": residentData['name'] ?? "Unknown",
           "resident_phone": phoneNum,
@@ -257,6 +387,119 @@ class GuardService {
       });
     } catch (e) {
       throw Exception("Error denying access: $e");
+    }
+  }
+
+  // Grant access for visitor QR
+  Future<void> grantVisitorAccess({
+    required String residentId,
+    required String visitorQrId,
+    required String guardId,
+    required String visitorName,
+  }) async {
+    try {
+      DateTime now = DateTime.now();
+
+      // Update visitor QR session
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .doc(visitorQrId)
+          .update({
+            "scanned_at": now,
+            "scanned_by_guard": guardId,
+            "access_granted": true,
+          });
+
+      // Log visitor access event
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("access_logs")
+          .add({
+            "qr_id": visitorQrId,
+            "timestamp": now,
+            "access_granted": true,
+            "scanned_by_guard": guardId,
+            "type": "visitor_entry",
+            "visitor_name": visitorName,
+          });
+
+      // Update guard's scan log
+      await _firestore
+          .collection("guards")
+          .doc(guardId)
+          .collection("scan_logs")
+          .add({
+            "resident_id": residentId,
+            "qr_id": visitorQrId,
+            "timestamp": now,
+            "access_granted": true,
+            "entry_type": "VISITOR_IN",
+            "resident_name": await _getResidentName(residentId),
+            "visitor_name": visitorName,
+          });
+    } catch (e) {
+      throw Exception("Error granting visitor access: $e");
+    }
+  }
+
+  // Deny access for visitor QR
+  Future<void> denyVisitorAccess({
+    required String residentId,
+    required String visitorQrId,
+    required String guardId,
+    required String reason,
+    required String visitorName,
+  }) async {
+    try {
+      DateTime now = DateTime.now();
+
+      // Update visitor QR session
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .doc(visitorQrId)
+          .update({
+            "scanned_at": now,
+            "scanned_by_guard": guardId,
+            "access_granted": false,
+          });
+
+      // Log visitor access event
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("access_logs")
+          .add({
+            "qr_id": visitorQrId,
+            "timestamp": now,
+            "access_granted": false,
+            "scanned_by_guard": guardId,
+            "reason": reason,
+            "type": "visitor_denied",
+            "visitor_name": visitorName,
+          });
+
+      // Update guard's scan log
+      await _firestore
+          .collection("guards")
+          .doc(guardId)
+          .collection("scan_logs")
+          .add({
+            "resident_id": residentId,
+            "qr_id": visitorQrId,
+            "timestamp": now,
+            "access_granted": false,
+            "entry_type": "VISITOR_DENIED",
+            "resident_name": await _getResidentName(residentId),
+            "visitor_name": visitorName,
+            "denial_reason": reason,
+          });
+    } catch (e) {
+      throw Exception("Error denying visitor access: $e");
     }
   }
 

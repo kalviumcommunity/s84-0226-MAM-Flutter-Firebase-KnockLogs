@@ -225,4 +225,139 @@ class ResidentService {
       throw Exception("Error fetching today's summary: $e");
     }
   }
+
+  // Create visitor QR - for guests/temporary visitors
+  Future<String> createVisitorQR({
+    required String visitorName,
+    required String visitorPhone,
+    required String visitorEmail,
+    String? visitorPurpose,
+  }) async {
+    try {
+      String? residentId = _auth.currentUser?.uid;
+      if (residentId == null) throw Exception("User not authenticated");
+
+      // Get current resident's details
+      DocumentSnapshot residentDoc = await _firestore.collection("users").doc(residentId).get();
+      if (!residentDoc.exists) {
+        throw Exception("Resident profile not found");
+      }
+
+      Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
+      String residentName = residentData['name'] ?? 'Unknown';
+      String residentEmail = residentData['email'] ?? '';
+      String residentPhone = residentData['phone'] ?? '';
+      String flatNumber = residentData['flatNo'] ?? 'Unknown';
+
+      String visitorQrId = const Uuid().v4();
+      DateTime now = DateTime.now();
+      // Visitor QR expires after 8 hours
+      DateTime expiresAt = now.add(const Duration(hours: 8));
+
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .doc(visitorQrId)
+          .set({
+            "qr_id": visitorQrId,
+            "resident_id": residentId,
+            "resident_name": residentName,
+            "resident_email": residentEmail,
+            "resident_phone": residentPhone,
+            "flat_number": flatNumber,
+            "visitor_name": visitorName,
+            "visitor_phone": visitorPhone,
+            "visitor_email": visitorEmail,
+            "visitor_purpose": visitorPurpose ?? "Visit",
+            "created_at": now,
+            "expires_at": expiresAt,
+            "scanned_at": null,
+            "scanned_by_guard": null,
+            "is_valid": true,
+            "access_granted": null,
+            "type": "visitor",
+          });
+
+      // Format: visitor|residentId|visitorQrId|timestamp
+      return "visitor|$residentId|$visitorQrId|${now.toIso8601String()}";
+    } catch (e) {
+      throw Exception("Error creating visitor QR: $e");
+    }
+  }
+
+  // Get all active visitor QRs for this resident
+  Future<List<Map<String, dynamic>>> getActiveVisitorQRs() async {
+    try {
+      String? residentId = _auth.currentUser?.uid;
+      if (residentId == null) return [];
+
+      DateTime now = DateTime.now();
+
+      QuerySnapshot snapshot = await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .where("is_valid", isEqualTo: true)
+          .where("expires_at", isGreaterThan: now)
+          .orderBy("expires_at", descending: false)
+          .get();
+
+      // Filter for unscanned QRs (scanned_at is null)
+      return snapshot.docs
+          .where((doc) => (doc.data() as Map<String, dynamic>)["scanned_at"] == null)
+          .map((doc) => {
+                "id": doc.id,
+                ...doc.data() as Map<String, dynamic>,
+              })
+          .toList();
+    } catch (e) {
+      print("Error fetching visitor QRs: $e");
+      throw Exception("Error fetching visitor QRs: $e");
+    }
+  }
+
+  // Get all visitor QRs (including expired and used)
+  Future<List<Map<String, dynamic>>> getAllVisitorQRs() async {
+    try {
+      String? residentId = _auth.currentUser?.uid;
+      if (residentId == null) return [];
+
+      QuerySnapshot snapshot = await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .orderBy("created_at", descending: true)
+          .limit(100)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => {
+                "id": doc.id,
+                ...doc.data() as Map<String, dynamic>,
+              })
+          .toList();
+    } catch (e) {
+      throw Exception("Error fetching visitor QRs: $e");
+    }
+  }
+
+  // Invalidate a visitor QR
+  Future<void> invalidateVisitorQR(String visitorQrId) async {
+    try {
+      String? residentId = _auth.currentUser?.uid;
+      if (residentId == null) throw Exception("User not authenticated");
+
+      await _firestore
+          .collection("residents")
+          .doc(residentId)
+          .collection("visitor_qr_sessions")
+          .doc(visitorQrId)
+          .update({
+            "is_valid": false,
+          });
+    } catch (e) {
+      throw Exception("Error invalidating visitor QR: $e");
+    }
+  }
 }
