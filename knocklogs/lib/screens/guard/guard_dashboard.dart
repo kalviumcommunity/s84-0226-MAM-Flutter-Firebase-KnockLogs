@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/guard_service.dart';
+import '../auth/login_screen.dart';
 
 class GuardDashboard extends StatefulWidget {
   const GuardDashboard({super.key});
@@ -385,9 +386,13 @@ class _GuardDashboardState extends State<GuardDashboard> {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              _auth.signOut();
+            onPressed: () async {
+              await _auth.signOut();
               Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
             },
             child: const Text(
               "Logout",

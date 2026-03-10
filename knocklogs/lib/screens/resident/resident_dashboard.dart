@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/resident_service.dart';
+import '../auth/login_screen.dart';
 
 class ResidentDashboard extends StatefulWidget {
   const ResidentDashboard({super.key});
@@ -136,9 +137,13 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              _auth.signOut();
+            onPressed: () async {
+              await _auth.signOut();
               Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
             },
             child: const Text(
               "Logout",

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/admin_service.dart';
 import 'user_detail_view.dart';
+import '../auth/login_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -13,6 +15,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   int _selectedTab = 0;
   final GlobalKey<_GuardsTabState> _guardsTabKey = GlobalKey();
   final GlobalKey<_ResidentsTabState> _residentsTabKey = GlobalKey();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Light theme colors
   static const Color bgLight = Color(0xFFF8F9FA);
@@ -60,12 +63,50 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ],
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: _logout,
+          color: textLight,
+        ),
+      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
           color: borderGray,
           height: 1,
         ),
+      ),
+    );
+  }
+
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _auth.signOut();
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+            child: const Text(
+              "Logout",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
+          ),
+        ],
       ),
     );
   }
