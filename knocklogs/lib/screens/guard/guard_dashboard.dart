@@ -4,7 +4,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/guard_service.dart';
-import '../auth/login_screen.dart';
 
 class GuardDashboard extends StatefulWidget {
   const GuardDashboard({super.key});
@@ -84,10 +83,11 @@ class _GuardDashboardState extends State<GuardDashboard> {
       } else {
         String entryType = result['entry_type'] ?? "IN";
         String buttonText = entryType == "IN" ? "ENTRY" : "EXIT";
+        String welcomeName = result['is_visitor'] == true ? result['visitor_name'] ?? 'Visitor' : result['resident_name'] ?? 'Unknown';
         _showValidationDialog(
           isValid: true,
           title: "Access Granted",
-          message: "Welcome, ${result['resident_name']}!",
+          message: "Welcome, $welcomeName!",
           resident: result,
           entryType: entryType,
         );
@@ -240,6 +240,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
   }
 
   Widget _buildResidentInfoWidget(Map<String, dynamic> resident) {
+    bool isVisitor = resident['is_visitor'] == true;
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -250,10 +252,61 @@ class _GuardDashboardState extends State<GuardDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow("Name", resident['resident_name'] ?? 'N/A'),
-          _buildInfoRow("Email", resident['resident_email'] ?? 'N/A'),
-          _buildInfoRow("Phone", resident['resident_phone'] ?? 'N/A'),
-          _buildInfoRow("Flat/Unit", resident['flat_number'] ?? 'N/A'),
+          if (isVisitor) ...
+          [
+            // Visitor Details
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.person_outline, color: primaryIndigo, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    "👤 Visitor Details",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: primaryIndigo,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildInfoRow("Name", resident['visitor_name'] ?? 'Unknown'),
+            _buildInfoRow("Email", resident['visitor_email'] ?? 'N/A'),
+            _buildInfoRow("Phone", resident['visitor_phone'] ?? 'N/A'),
+            _buildInfoRow("Purpose", resident['visitor_purpose'] ?? 'Visit'),
+            const Divider(height: 16),
+            // Resident/Host Details
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.home, color: primaryIndigo, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    "🏠 Resident (Host)",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: primaryIndigo,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildInfoRow("Name", resident['resident_name'] ?? 'Unknown'),
+            _buildInfoRow("Email", resident['resident_email'] ?? 'N/A'),
+            _buildInfoRow("Phone", resident['resident_phone'] ?? 'N/A'),
+            _buildInfoRow("Flat/Unit", resident['flat_number'] ?? 'N/A'),
+          ]
+          else ...
+          [
+            _buildInfoRow("Name", resident['resident_name'] ?? 'N/A'),
+            _buildInfoRow("Email", resident['resident_email'] ?? 'N/A'),
+            _buildInfoRow("Phone", resident['resident_phone'] ?? 'N/A'),
+            _buildInfoRow("Flat/Unit", resident['flat_number'] ?? 'N/A'),
+          ]
         ],
       ),
     );
@@ -293,13 +346,25 @@ class _GuardDashboardState extends State<GuardDashboard> {
       String? guardId = _auth.currentUser?.uid;
       if (guardId == null) return;
 
-      await _guardService.grantAccess(
-        residentId: resident['resident_id'],
-        qrId: resident['qr_id'],
-        guardId: guardId,
-      );
+      // Check if it's a visitor QR
+      if (resident['is_visitor'] == true) {
+        await _guardService.grantVisitorAccess(
+          residentId: resident['resident_id'],
+          visitorQrId: resident['qr_id'],
+          guardId: guardId,
+          visitorName: resident['visitor_name'] ?? 'Visitor',
+        );
+        _showSuccessSnackbar("Visitor access granted: ${resident['visitor_name']}");
+      } else {
+        // Regular resident QR
+        await _guardService.grantAccess(
+          residentId: resident['resident_id'],
+          qrId: resident['qr_id'],
+          guardId: guardId,
+        );
+        _showSuccessSnackbar("Access granted to ${resident['resident_name']}");
+      }
 
-      _showSuccessSnackbar("Access granted to ${resident['resident_name']}");
       _loadScanHistory();
     } catch (e) {
       _showErrorSnackbar("Error granting access: $e");
@@ -316,14 +381,27 @@ class _GuardDashboardState extends State<GuardDashboard> {
         reason = resident['reason'];
       }
 
-      await _guardService.denyAccess(
-        residentId: resident['resident_id'],
-        qrId: resident['qr_id'],
-        guardId: guardId,
-        reason: reason,
-      );
+      // Check if it's a visitor QR
+      if (resident['is_visitor'] == true) {
+        await _guardService.denyVisitorAccess(
+          residentId: resident['resident_id'],
+          visitorQrId: resident['qr_id'],
+          guardId: guardId,
+          reason: reason,
+          visitorName: resident['visitor_name'] ?? 'Visitor',
+        );
+        _showErrorSnackbar("Access denied for visitor: ${resident['visitor_name']}");
+      } else {
+        // Regular resident QR
+        await _guardService.denyAccess(
+          residentId: resident['resident_id'],
+          qrId: resident['qr_id'],
+          guardId: guardId,
+          reason: reason,
+        );
+        _showErrorSnackbar("Access denied for ${resident['resident_name']}");
+      }
 
-      _showErrorSnackbar("Access denied for ${resident['resident_name']}");
       _loadScanHistory();
     } catch (e) {
       _showErrorSnackbar("Error denying access: $e");
@@ -386,13 +464,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () async {
-              await _auth.signOut();
+            onPressed: () {
+              _auth.signOut();
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
             },
             child: const Text(
               "Logout",
