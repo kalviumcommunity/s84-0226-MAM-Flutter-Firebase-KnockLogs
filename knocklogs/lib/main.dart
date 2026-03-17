@@ -5,7 +5,11 @@ import 'firebase_options.dart';
 import 'screens/landing/landing_page.dart';
 import 'providers/theme_provider.dart';
 
-void main() async {
+
+/// Entry point of the application
+/// Initializes Firebase and runs the app
+
+void main() async {               // Initialize Firebase before running the app
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
