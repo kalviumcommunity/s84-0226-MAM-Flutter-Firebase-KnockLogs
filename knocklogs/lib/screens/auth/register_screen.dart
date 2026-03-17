@@ -319,8 +319,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                             return 'Email is required';
                           }
                           if (!RegExp(
-                                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                              .hasMatch(value)) {
+                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                          ).hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -748,10 +748,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 horizontal: 16,
                 vertical: 16,
               ),
-              errorStyle: TextStyle(
-                color: Colors.red.shade400,
-                fontSize: 12,
-              ),
+              errorStyle: TextStyle(color: Colors.red.shade400, fontSize: 12),
             ),
           ),
         ),

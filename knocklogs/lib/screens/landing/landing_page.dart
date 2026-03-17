@@ -206,7 +206,10 @@ class _LandingPageState extends State<LandingPage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: theme.isDarkMode
-                ? [const Color(0xFF2E3A59).withOpacity(0.8), const Color(0xFF1A1F2E).withOpacity(0.8)]
+                ? [
+                    const Color(0xFF2E3A59).withOpacity(0.8),
+                    const Color(0xFF1A1F2E).withOpacity(0.8),
+                  ]
                 : [mediumGreen.withOpacity(0.1), darkGreen.withOpacity(0.05)],
           ),
           border: Border.all(
@@ -243,11 +246,7 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 
-  Widget _buildModernCard(
-    OnboardingData data,
-    int index,
-    ThemeProvider theme,
-  ) {
+  Widget _buildModernCard(OnboardingData data, int index, ThemeProvider theme) {
     return AnimatedBuilder(
       animation: _pageController,
       builder: (context, child) {
@@ -399,10 +398,7 @@ class _LandingPageState extends State<LandingPage>
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: orange.withOpacity(0.15),
-                width: 2,
-              ),
+              border: Border.all(color: orange.withOpacity(0.15), width: 2),
             ),
           ),
           // Main shapes
@@ -446,10 +442,7 @@ class _LandingPageState extends State<LandingPage>
                 height: 90,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      orange,
-                      orange.withOpacity(0.7),
-                    ],
+                    colors: [orange, orange.withOpacity(0.7)],
                   ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
@@ -498,7 +491,8 @@ class _LandingPageState extends State<LandingPage>
             return AnimatedBuilder(
               animation: _floatController,
               builder: (context, child) => Transform.rotate(
-                angle: _floatController.value *
+                angle:
+                    _floatController.value *
                     (i % 2 == 0 ? math.pi * 2 : -math.pi * 2),
                 child: Container(
                   width: 160.0 - (i * 35),
@@ -520,10 +514,7 @@ class _LandingPageState extends State<LandingPage>
             height: 40,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  orange,
-                  orange.withOpacity(0.6),
-                ],
+                colors: [orange, orange.withOpacity(0.6)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
@@ -554,24 +545,29 @@ class _LandingPageState extends State<LandingPage>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      (i == 0 ? orange : i == 1 ? data.primaryColor : darkGreen)
+                      (i == 0
+                              ? orange
+                              : i == 1
+                              ? data.primaryColor
+                              : darkGreen)
                           .withOpacity(0.9),
                       (i == 0
                               ? orange
                               : i == 1
-                                  ? data.primaryColor
-                                  : darkGreen)
+                              ? data.primaryColor
+                              : darkGreen)
                           .withOpacity(0.5),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (i == 0
-                              ? orange
-                              : i == 1
+                      color:
+                          (i == 0
+                                  ? orange
+                                  : i == 1
                                   ? data.primaryColor
                                   : darkGreen)
-                          .withOpacity(0.35),
+                              .withOpacity(0.35),
                       blurRadius: 18,
                       offset: Offset(0, 8 + i * 2),
                     ),
@@ -608,8 +604,6 @@ class _LandingPageState extends State<LandingPage>
     }
   }
 
-
-
   Widget _buildModernButton({
     required String label,
     required VoidCallback onPressed,
@@ -630,10 +624,7 @@ class _LandingPageState extends State<LandingPage>
             : null,
         border: isPrimary
             ? null
-            : Border.all(
-                color: mediumGreen.withOpacity(0.5),
-                width: 2,
-              ),
+            : Border.all(color: mediumGreen.withOpacity(0.5), width: 2),
         boxShadow: isPrimary
             ? [
                 BoxShadow(
@@ -650,7 +641,9 @@ class _LandingPageState extends State<LandingPage>
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
-          splashColor: isPrimary ? Colors.white.withOpacity(0.1) : mediumGreen.withOpacity(0.1),
+          splashColor: isPrimary
+              ? Colors.white.withOpacity(0.1)
+              : mediumGreen.withOpacity(0.1),
           child: Center(
             child: Text(
               label,

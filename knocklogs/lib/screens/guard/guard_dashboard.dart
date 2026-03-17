@@ -83,7 +83,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
       } else {
         String entryType = result['entry_type'] ?? "IN";
         String buttonText = entryType == "IN" ? "ENTRY" : "EXIT";
-        String welcomeName = result['is_visitor'] == true ? result['visitor_name'] ?? 'Visitor' : result['resident_name'] ?? 'Unknown';
+        String welcomeName = result['is_visitor'] == true
+            ? result['visitor_name'] ?? 'Visitor'
+            : result['resident_name'] ?? 'Unknown';
         _showValidationDialog(
           isValid: true,
           title: "Access Granted",
@@ -201,10 +203,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(
-                backgroundColor: (entryType == "IN"
-                        ? successGreen
-                        : const Color(0xFFEC4899))
-                    .withOpacity(0.1),
+                backgroundColor:
+                    (entryType == "IN" ? successGreen : const Color(0xFFEC4899))
+                        .withOpacity(0.1),
               ),
               child: Text(
                 entryType == "IN" ? "ALLOW ENTRY" : "ALLOW EXIT",
@@ -241,7 +242,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
   Widget _buildResidentInfoWidget(Map<String, dynamic> resident) {
     bool isVisitor = resident['is_visitor'] == true;
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -252,8 +253,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isVisitor) ...
-          [
+          if (isVisitor) ...[
             // Visitor Details
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -299,14 +299,12 @@ class _GuardDashboardState extends State<GuardDashboard> {
             _buildInfoRow("Email", resident['resident_email'] ?? 'N/A'),
             _buildInfoRow("Phone", resident['resident_phone'] ?? 'N/A'),
             _buildInfoRow("Flat/Unit", resident['flat_number'] ?? 'N/A'),
-          ]
-          else ...
-          [
+          ] else ...[
             _buildInfoRow("Name", resident['resident_name'] ?? 'N/A'),
             _buildInfoRow("Email", resident['resident_email'] ?? 'N/A'),
             _buildInfoRow("Phone", resident['resident_phone'] ?? 'N/A'),
             _buildInfoRow("Flat/Unit", resident['flat_number'] ?? 'N/A'),
-          ]
+          ],
         ],
       ),
     );
@@ -354,7 +352,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
           guardId: guardId,
           visitorName: resident['visitor_name'] ?? 'Visitor',
         );
-        _showSuccessSnackbar("Visitor access granted: ${resident['visitor_name']}");
+        _showSuccessSnackbar(
+          "Visitor access granted: ${resident['visitor_name']}",
+        );
       } else {
         // Regular resident QR
         await _guardService.grantAccess(
@@ -390,7 +390,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
           reason: reason,
           visitorName: resident['visitor_name'] ?? 'Visitor',
         );
-        _showErrorSnackbar("Access denied for visitor: ${resident['visitor_name']}");
+        _showErrorSnackbar(
+          "Access denied for visitor: ${resident['visitor_name']}",
+        );
       } else {
         // Regular resident QR
         await _guardService.denyAccess(
@@ -468,10 +470,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               _auth.signOut();
               Navigator.pop(context);
             },
-            child: const Text(
-              "Logout",
-              style: TextStyle(color: dangerRed),
-            ),
+            child: const Text("Logout", style: TextStyle(color: dangerRed)),
           ),
         ],
       ),
@@ -612,7 +611,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
             ),
             child: const Text(
               "Delete",
-              style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Color(0xFFEF4444),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -681,7 +683,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
             ),
             child: const Text(
               "Delete All",
-              style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Color(0xFFEF4444),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -826,15 +831,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
   Widget _buildBody() {
     return Column(
       children: [
-        Expanded(
-          flex: 3,
-          child: _buildScannerSection(),
-        ),
+        Expanded(flex: 3, child: _buildScannerSection()),
         const Divider(height: 1),
-        Expanded(
-          flex: 2,
-          child: _buildHistorySection(),
-        ),
+        Expanded(flex: 2, child: _buildHistorySection()),
       ],
     );
   }
@@ -882,10 +881,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
             bottom: 100,
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.greenAccent,
-                  width: 2,
-                ),
+                border: Border.all(color: Colors.greenAccent, width: 2),
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -972,7 +968,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
     for (var log in _scanHistory) {
       final timestamp = (log['timestamp'] as Timestamp).toDate();
       final dateKey = DateFormat("yyyy-MM-dd").format(timestamp);
-      
+
       if (!groupedLogs.containsKey(dateKey)) {
         groupedLogs[dateKey] = [];
       }
@@ -980,7 +976,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
     }
 
     // Sort dates in descending order
-    final sortedDates = groupedLogs.keys.toList()..sort((a, b) => b.compareTo(a));
+    final sortedDates = groupedLogs.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
 
     return ListView.builder(
       itemCount: sortedDates.length,
@@ -1011,7 +1008,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: primaryIndigo.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -1058,7 +1058,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
                 final entryType = log['entry_type'] ?? 'IN';
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(color: bgLight, width: 1),
@@ -1076,9 +1079,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          isGranted
-                              ? Icons.check_circle
-                              : Icons.cancel,
+                          isGranted ? Icons.check_circle : Icons.cancel,
                           color: isGranted ? successGreen : dangerRed,
                           size: 22,
                         ),
@@ -1115,7 +1116,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
                                     decoration: BoxDecoration(
                                       color: entryType == 'IN'
                                           ? successGreen.withOpacity(0.2)
-                                          : const Color(0xFFEC4899).withOpacity(0.2),
+                                          : const Color(
+                                              0xFFEC4899,
+                                            ).withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
