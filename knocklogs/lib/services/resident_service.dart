@@ -12,13 +12,13 @@ class ResidentService {
       String? uid = _auth.currentUser?.uid;
       if (uid == null) return null;
 
-      DocumentSnapshot doc = await _firestore.collection("users").doc(uid).get();
+      DocumentSnapshot doc = await _firestore
+          .collection("users")
+          .doc(uid)
+          .get();
 
       if (doc.exists) {
-        return {
-          "id": uid,
-          ...doc.data() as Map<String, dynamic>,
-        };
+        return {"id": uid, ...doc.data() as Map<String, dynamic>};
       }
       return null;
     } catch (e) {
@@ -30,10 +30,10 @@ class ResidentService {
   String generateQRData() {
     String? uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception("User not authenticated");
-    
+
     String timestamp = DateTime.now().toIso8601String();
     String qrId = const Uuid().v4();
-    
+
     // Format: uid|qrId|timestamp
     return "$uid|$qrId|$timestamp";
   }
@@ -83,10 +83,7 @@ class ResidentService {
           .get();
 
       return snapshot.docs
-          .map((doc) => {
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map((doc) => {"id": doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
     } catch (e) {
       throw Exception("Error fetching access logs: $e");
@@ -113,13 +110,18 @@ class ResidentService {
       String? uid = _auth.currentUser?.uid;
       if (uid == null) throw Exception("User not authenticated");
 
-      DocumentSnapshot doc = await _firestore.collection("users").doc(uid).get();
-      
+      DocumentSnapshot doc = await _firestore
+          .collection("users")
+          .doc(uid)
+          .get();
+
       if (doc.exists) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        
+
         // If phone field is missing or empty, add a placeholder
-        if (!data.containsKey("phone") || data["phone"] == null || data["phone"].toString().isEmpty) {
+        if (!data.containsKey("phone") ||
+            data["phone"] == null ||
+            data["phone"].toString().isEmpty) {
           await _firestore.collection("users").doc(uid).update({
             "phone": "Not provided",
           });
@@ -187,7 +189,14 @@ class ResidentService {
 
       DateTime today = DateTime.now();
       DateTime startOfDay = DateTime(today.year, today.month, today.day);
-      DateTime endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+      DateTime endOfDay = DateTime(
+        today.year,
+        today.month,
+        today.day,
+        23,
+        59,
+        59,
+      );
 
       QuerySnapshot snapshot = await _firestore
           .collection("residents")
@@ -218,8 +227,12 @@ class ResidentService {
       return {
         "check_in_time": checkInTime,
         "check_out_time": checkOutTime,
-        "total_entries": todaysLogs.where((l) => l['access_granted'] == true).length,
-        "denied_attempts": todaysLogs.where((l) => l['access_granted'] == false).length,
+        "total_entries": todaysLogs
+            .where((l) => l['access_granted'] == true)
+            .length,
+        "denied_attempts": todaysLogs
+            .where((l) => l['access_granted'] == false)
+            .length,
       };
     } catch (e) {
       throw Exception("Error fetching today's summary: $e");
@@ -238,12 +251,16 @@ class ResidentService {
       if (residentId == null) throw Exception("User not authenticated");
 
       // Get current resident's details
-      DocumentSnapshot residentDoc = await _firestore.collection("users").doc(residentId).get();
+      DocumentSnapshot residentDoc = await _firestore
+          .collection("users")
+          .doc(residentId)
+          .get();
       if (!residentDoc.exists) {
         throw Exception("Resident profile not found");
       }
 
-      Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> residentData =
+          residentDoc.data() as Map<String, dynamic>;
       String residentName = residentData['name'] ?? 'Unknown';
       String residentEmail = residentData['email'] ?? '';
       String residentPhone = residentData['phone'] ?? '';
@@ -305,11 +322,10 @@ class ResidentService {
 
       // Filter for unscanned QRs (scanned_at is null)
       return snapshot.docs
-          .where((doc) => (doc.data() as Map<String, dynamic>)["scanned_at"] == null)
-          .map((doc) => {
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .where(
+            (doc) => (doc.data() as Map<String, dynamic>)["scanned_at"] == null,
+          )
+          .map((doc) => {"id": doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
     } catch (e) {
       print("Error fetching visitor QRs: $e");
@@ -332,10 +348,7 @@ class ResidentService {
           .get();
 
       return snapshot.docs
-          .map((doc) => {
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map((doc) => {"id": doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
     } catch (e) {
       throw Exception("Error fetching visitor QRs: $e");
@@ -353,9 +366,7 @@ class ResidentService {
           .doc(residentId)
           .collection("visitor_qr_sessions")
           .doc(visitorQrId)
-          .update({
-            "is_valid": false,
-          });
+          .update({"is_valid": false});
     } catch (e) {
       throw Exception("Error invalidating visitor QR: $e");
     }

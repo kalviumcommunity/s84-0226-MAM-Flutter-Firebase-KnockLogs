@@ -14,8 +14,10 @@ class AuthService {
 
       String uid = userCred.user!.uid;
 
-      DocumentSnapshot doc =
-          await _firestore.collection("users").doc(uid).get();
+      DocumentSnapshot doc = await _firestore
+          .collection("users")
+          .doc(uid)
+          .get();
 
       return doc['role']; // return role
     } catch (e) {

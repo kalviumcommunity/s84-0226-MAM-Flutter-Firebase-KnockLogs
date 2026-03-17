@@ -72,10 +72,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(
-          color: borderGray,
-          height: 1,
-        ),
+        child: Container(color: borderGray, height: 1),
       ),
     );
   }
@@ -115,9 +112,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Container(
       decoration: BoxDecoration(
         color: cardWhite,
-        border: Border(
-          top: BorderSide(color: borderGray, width: 1),
-        ),
+        border: Border(top: BorderSide(color: borderGray, width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: cardWhite,
@@ -139,14 +134,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             icon: Icon(Icons.pending_actions),
             label: "Pending",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.security),
-            label: "Guards",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Residents",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.security), label: "Guards"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Residents"),
         ],
       ),
     );
@@ -205,7 +194,10 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                 _showError("Error approving user: $e");
               }
             },
-            child: const Text("Approve", style: TextStyle(color: Color(0xFF10B981))),
+            child: const Text(
+              "Approve",
+              style: TextStyle(color: Color(0xFF10B981)),
+            ),
           ),
         ],
       ),
@@ -236,7 +228,10 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                 _showError("Error rejecting user: $e");
               }
             },
-            child: const Text("Reject", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Reject",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -358,7 +353,10 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                     color: const Color(0xFFFFD700).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   child: Text(
                     role.toUpperCase(),
                     style: const TextStyle(
@@ -376,7 +374,8 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _rejectUser(request['id'], request['name']),
+                    onPressed: () =>
+                        _rejectUser(request['id'], request['name']),
                     icon: const Icon(Icons.close, size: 18),
                     label: const Text("Reject"),
                     style: ElevatedButton.styleFrom(
@@ -393,7 +392,8 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _approveUser(request['id'], request['name']),
+                    onPressed: () =>
+                        _approveUser(request['id'], request['name']),
                     icon: const Icon(Icons.check, size: 18),
                     label: const Text("Approve"),
                     style: ElevatedButton.styleFrom(
@@ -420,11 +420,7 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: const Color(0xFF6B7280).withOpacity(0.3),
-          ),
+          Icon(icon, size: 80, color: const Color(0xFF6B7280).withOpacity(0.3)),
           const SizedBox(height: 20),
           Text(
             message,
@@ -507,7 +503,10 @@ class _GuardsTabState extends State<GuardsTab> {
                 _showError("Error deleting guard: $e");
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -547,7 +546,10 @@ class _GuardsTabState extends State<GuardsTab> {
                     children: [
                       SizedBox(
                         height: MediaQuery.of(context).size.height - 200,
-                        child: _buildEmptyState("No guards found", Icons.person_off),
+                        child: _buildEmptyState(
+                          "No guards found",
+                          Icons.person_off,
+                        ),
                       ),
                     ],
                   )
@@ -571,10 +573,7 @@ class _GuardsTabState extends State<GuardsTab> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
       ),
       child: TextField(
         controller: _searchController,
@@ -596,10 +595,7 @@ class _GuardsTabState extends State<GuardsTab> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -612,10 +608,7 @@ class _GuardsTabState extends State<GuardsTab> {
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
           backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
-          child: const Icon(
-            Icons.security,
-            color: Color(0xFF6366F1),
-          ),
+          child: const Icon(Icons.security, color: Color(0xFF6366F1)),
         ),
         title: Text(
           user['name'] ?? 'Unknown',
@@ -627,10 +620,7 @@ class _GuardsTabState extends State<GuardsTab> {
         ),
         subtitle: Text(
           user['email'] ?? 'No email',
-          style: const TextStyle(
-            color: Color(0xFF6B7280),
-            fontSize: 13,
-          ),
+          style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
         ),
         trailing: PopupMenuButton(
           itemBuilder: (context) => [
@@ -644,7 +634,10 @@ class _GuardsTabState extends State<GuardsTab> {
               },
             ),
             PopupMenuItem(
-              child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+              child: const Text(
+                "Delete",
+                style: TextStyle(color: Color(0xFFEF4444)),
+              ),
               onTap: () {
                 Future.delayed(
                   const Duration(milliseconds: 300),
@@ -661,9 +654,7 @@ class _GuardsTabState extends State<GuardsTab> {
   void _showUserDetails(Map<String, dynamic> user) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => UserDetailView(user: user),
-      ),
+      MaterialPageRoute(builder: (context) => UserDetailView(user: user)),
     );
   }
 
@@ -672,11 +663,7 @@ class _GuardsTabState extends State<GuardsTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: const Color(0xFF6B7280).withOpacity(0.3),
-          ),
+          Icon(icon, size: 80, color: const Color(0xFF6B7280).withOpacity(0.3)),
           const SizedBox(height: 20),
           Text(
             message,
@@ -768,7 +755,10 @@ class _ResidentsTabState extends State<ResidentsTab> {
                 _showError("Error deleting resident: $e");
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -808,7 +798,10 @@ class _ResidentsTabState extends State<ResidentsTab> {
                     children: [
                       SizedBox(
                         height: MediaQuery.of(context).size.height - 200,
-                        child: _buildEmptyState("No residents found", Icons.person_off),
+                        child: _buildEmptyState(
+                          "No residents found",
+                          Icons.person_off,
+                        ),
                       ),
                     ],
                   )
@@ -832,10 +825,7 @@ class _ResidentsTabState extends State<ResidentsTab> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
       ),
       child: TextField(
         controller: _searchController,
@@ -857,10 +847,7 @@ class _ResidentsTabState extends State<ResidentsTab> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -873,10 +860,7 @@ class _ResidentsTabState extends State<ResidentsTab> {
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
           backgroundColor: const Color(0xFF06B6D4).withOpacity(0.1),
-          child: const Icon(
-            Icons.home,
-            color: Color(0xFF06B6D4),
-          ),
+          child: const Icon(Icons.home, color: Color(0xFF06B6D4)),
         ),
         title: Text(
           user['name'] ?? 'Unknown',
@@ -892,26 +876,17 @@ class _ResidentsTabState extends State<ResidentsTab> {
             const SizedBox(height: 2),
             Text(
               user['email'] ?? 'No email',
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
             const SizedBox(height: 2),
             Text(
               "Phone: ${user['phone'] ?? 'N/A'}",
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
             ),
             const SizedBox(height: 2),
             Text(
               "Flat: ${user['flatNo'] ?? 'N/A'}",
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
             ),
           ],
         ),
@@ -927,7 +902,10 @@ class _ResidentsTabState extends State<ResidentsTab> {
               },
             ),
             PopupMenuItem(
-              child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+              child: const Text(
+                "Delete",
+                style: TextStyle(color: Color(0xFFEF4444)),
+              ),
               onTap: () {
                 Future.delayed(
                   const Duration(milliseconds: 300),
@@ -944,9 +922,7 @@ class _ResidentsTabState extends State<ResidentsTab> {
   void _showUserDetails(Map<String, dynamic> user) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => UserDetailView(user: user),
-      ),
+      MaterialPageRoute(builder: (context) => UserDetailView(user: user)),
     );
   }
 
@@ -955,11 +931,7 @@ class _ResidentsTabState extends State<ResidentsTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: const Color(0xFF6B7280).withOpacity(0.3),
-          ),
+          Icon(icon, size: 80, color: const Color(0xFF6B7280).withOpacity(0.3)),
           const SizedBox(height: 20),
           Text(
             message,

@@ -26,7 +26,7 @@ class _CounterScreenState extends State<CounterScreen> {
   Future<void> _navigateToRoleScreen() async {
     try {
       User? user = _auth.currentUser;
-      
+
       if (user == null) {
         // Not authenticated, go back to landing
         if (mounted) {
@@ -39,7 +39,10 @@ class _CounterScreenState extends State<CounterScreen> {
       }
 
       // Get user role from Firestore
-      DocumentSnapshot userDoc = await _firestore.collection("users").doc(user.uid).get();
+      DocumentSnapshot userDoc = await _firestore
+          .collection("users")
+          .doc(user.uid)
+          .get();
 
       if (!userDoc.exists) {
         // User document doesn't exist, logout and go to landing
