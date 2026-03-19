@@ -793,6 +793,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      automaticallyImplyLeading: false,
       elevation: 2,
       backgroundColor: cardWhite,
       centerTitle: true,
