@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -161,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               padding: const EdgeInsets.all(12),
                             ),
                           ),
-                          _buildThemeToggle(theme),
+                          const ThemeToggleButton(),
                         ],
                       ),
 
@@ -543,7 +545,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                             ),
                           ),
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginScreen(),
+                                ),
+                              );
+                            },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),
@@ -570,125 +579,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildThemeToggle(ThemeProvider theme) {
-    return GestureDetector(
-      onTap: theme.toggleTheme,
-      child: Container(
-        width: 70,
-        height: 35,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: theme.isDarkMode
-                ? [const Color(0xFF2E3A59), const Color(0xFF1A1F2E)]
-                : [const Color(0xFFFFC3A0), const Color(0xFFFFEFBA)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.isDarkMode
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.orange.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              left: theme.isDarkMode ? 5 : 40,
-              top: 5,
-              child: Container(
-                width: 25,
-                height: 25,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.isDarkMode
-                      ? const Color(0xFFF4E5A1)
-                      : const Color(0xFFFFD700),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.isDarkMode
-                          ? const Color(0xFFF4E5A1).withOpacity(0.5)
-                          : const Color(0xFFFFD700).withOpacity(0.5),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: theme.isDarkMode
-                    ? Stack(
-                        children: [
-                          Positioned(
-                            right: 8,
-                            top: 3,
-                            child: Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 3,
-                            top: 8,
-                            child: Container(
-                              width: 4,
-                              height: 4,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : null,
-              ),
-            ),
-            if (theme.isDarkMode) ...[
-              Positioned(
-                right: 15,
-                top: 8,
-                child: Icon(
-                  Icons.star,
-                  size: 8,
-                  color: const Color(0xFFF4E5A1).withOpacity(0.7),
-                ),
-              ),
-              Positioned(
-                right: 25,
-                top: 15,
-                child: Icon(
-                  Icons.star,
-                  size: 6,
-                  color: const Color(0xFFF4E5A1).withOpacity(0.5),
-                ),
-              ),
-            ],
-            if (!theme.isDarkMode) ...[
-              Positioned(
-                left: 5,
-                top: 10,
-                child: Container(
-                  width: 12,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 

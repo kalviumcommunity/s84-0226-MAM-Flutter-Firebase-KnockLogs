@@ -7,6 +7,7 @@ import '../admin/admin_dashboard.dart';
 import 'register_screen.dart';
 import '../../services/google_auth_service.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -143,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 padding: const EdgeInsets.all(12),
                               ),
                             ),
-                            _buildThemeToggle(theme),
+                            const ThemeToggleButton(),
                           ],
                         ),
 
@@ -487,125 +488,6 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildThemeToggle(ThemeProvider theme) {
-    return GestureDetector(
-      onTap: theme.toggleTheme,
-      child: Container(
-        width: 70,
-        height: 35,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: theme.isDarkMode
-                ? [const Color(0xFF2E3A59), const Color(0xFF1A1F2E)]
-                : [const Color(0xFFFFC3A0), const Color(0xFFFFEFBA)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.isDarkMode
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.orange.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              left: theme.isDarkMode ? 5 : 40,
-              top: 5,
-              child: Container(
-                width: 25,
-                height: 25,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.isDarkMode
-                      ? const Color(0xFFF4E5A1)
-                      : const Color(0xFFFFD700),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.isDarkMode
-                          ? const Color(0xFFF4E5A1).withOpacity(0.5)
-                          : const Color(0xFFFFD700).withOpacity(0.5),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: theme.isDarkMode
-                    ? Stack(
-                        children: [
-                          Positioned(
-                            right: 8,
-                            top: 3,
-                            child: Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 3,
-                            top: 8,
-                            child: Container(
-                              width: 4,
-                              height: 4,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : null,
-              ),
-            ),
-            if (theme.isDarkMode) ...[
-              Positioned(
-                right: 15,
-                top: 8,
-                child: Icon(
-                  Icons.star,
-                  size: 8,
-                  color: const Color(0xFFF4E5A1).withOpacity(0.7),
-                ),
-              ),
-              Positioned(
-                right: 25,
-                top: 15,
-                child: Icon(
-                  Icons.star,
-                  size: 6,
-                  color: const Color(0xFFF4E5A1).withOpacity(0.5),
-                ),
-              ),
-            ],
-            if (!theme.isDarkMode) ...[
-              Positioned(
-                left: 5,
-                top: 10,
-                child: Container(
-                  width: 12,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 

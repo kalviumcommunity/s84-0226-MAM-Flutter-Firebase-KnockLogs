@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -102,7 +103,7 @@ class _LandingPageState extends State<LandingPage>
                           ),
                         ),
                       ),
-                      _buildThemeToggle(theme),
+                      const ThemeToggleButton(compact: true),
                     ],
                   ),
                 ),
@@ -191,58 +192,6 @@ class _LandingPageState extends State<LandingPage>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildThemeToggle(ThemeProvider theme) {
-    return GestureDetector(
-      onTap: theme.toggleTheme,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: theme.isDarkMode
-                ? [
-                    const Color(0xFF2E3A59).withOpacity(0.8),
-                    const Color(0xFF1A1F2E).withOpacity(0.8),
-                  ]
-                : [mediumGreen.withOpacity(0.1), darkGreen.withOpacity(0.05)],
-          ),
-          border: Border.all(
-            color: theme.isDarkMode
-                ? const Color(0xFFF4E5A1).withOpacity(0.2)
-                : mediumGreen.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.isDarkMode
-                  ? const Color(0xFF2E3A59).withOpacity(0.2)
-                  : mediumGreen.withOpacity(0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: theme.toggleTheme,
-            borderRadius: BorderRadius.circular(14),
-            child: Center(
-              child: Icon(
-                theme.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                color: theme.isDarkMode ? const Color(0xFFF4E5A1) : mediumGreen,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 

@@ -44,6 +44,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      automaticallyImplyLeading: false,
       elevation: 2,
       backgroundColor: cardWhite,
       centerTitle: true,
