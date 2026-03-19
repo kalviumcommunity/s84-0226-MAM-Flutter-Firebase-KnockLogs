@@ -833,9 +833,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
       automaticallyImplyLeading: false,
       elevation: 0,
       backgroundColor: cardWhite,
-      centerTitle: true,
+      centerTitle: false,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Icon(Icons.security, size: 26, color: primaryIndigo),
           const SizedBox(width: 12),
