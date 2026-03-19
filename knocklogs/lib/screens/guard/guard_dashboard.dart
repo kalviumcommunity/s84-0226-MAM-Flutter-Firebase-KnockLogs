@@ -18,10 +18,14 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
   late MobileScannerController _cameraController;
   bool _isScanning = false;
-  Map<String, dynamic>? _currentScanResult;
   List<Map<String, dynamic>> _scanHistory = [];
-  String? _errorMessage;
   TextEditingController _manualQRController = TextEditingController();
+
+  // NOTE: _currentScanResult and _errorMessage were previously present but
+  // not used anywhere else in the file. They were removed to clean analyzer
+  // warnings.
+
+  // Text controller already declared above
 
   // Colors
   static const Color primaryIndigo = Color(0xFF6366F1);
@@ -65,8 +69,6 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
     setState(() {
       _isScanning = true;
-      _currentScanResult = null;
-      _errorMessage = null;
     });
 
     try {
@@ -82,7 +84,6 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       } else {
         String entryType = result['entry_type'] ?? "IN";
-        String buttonText = entryType == "IN" ? "ENTRY" : "EXIT";
         String welcomeName = result['is_visitor'] == true
             ? result['visitor_name'] ?? 'Visitor'
             : result['resident_name'] ?? 'Unknown';
@@ -95,9 +96,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       }
 
-      setState(() {
-        _currentScanResult = result;
-      });
+      // result is used immediately when showing the dialog; no persistent
+      // storage is required here.
     } catch (e) {
       _showErrorDialog("Error", "Failed to process QR: $e");
     } finally {
@@ -149,8 +149,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: entryType == "IN"
-                        ? successGreen.withOpacity(0.1)
-                        : const Color(0xFFEC4899).withOpacity(0.1),
+                        ? successGreen.withAlpha(26)
+                        : const Color(0xFFEC4899).withAlpha(26),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: entryType == "IN"
@@ -178,7 +178,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: dangerRed.withOpacity(0.1),
+                    color: dangerRed.withAlpha(26),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: dangerRed, width: 1),
                   ),
@@ -205,7 +205,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               style: TextButton.styleFrom(
                 backgroundColor:
                     (entryType == "IN" ? successGreen : const Color(0xFFEC4899))
-                        .withOpacity(0.1),
+                        .withAlpha(26),
               ),
               child: Text(
                 entryType == "IN" ? "ALLOW ENTRY" : "ALLOW EXIT",
@@ -224,7 +224,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(
-                backgroundColor: dangerRed.withOpacity(0.1),
+                backgroundColor: dangerRed.withAlpha(26),
               ),
               child: Text(
                 "CONFIRM DENIAL",
@@ -246,7 +246,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: successGreen.withOpacity(0.1),
+        color: successGreen.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: successGreen, width: 1),
       ),
@@ -508,7 +508,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B).withOpacity(0.1),
+                  color: const Color(0xFFF59E0B).withAlpha(26),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
@@ -532,7 +532,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               }
             },
             style: TextButton.styleFrom(
-              backgroundColor: primaryIndigo.withOpacity(0.1),
+              backgroundColor: primaryIndigo.withAlpha(26),
             ),
             child: const Text(
               "PROCESS QR",
@@ -572,9 +572,9 @@ class _GuardDashboardState extends State<GuardDashboard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: dangerRed.withOpacity(0.1),
+                color: dangerRed.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: dangerRed.withOpacity(0.3)),
+                border: Border.all(color: dangerRed.withAlpha(77)),
               ),
               child: Text(
                 formattedDate,
@@ -607,7 +607,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               await _deleteDayLogs(date);
             },
             style: TextButton.styleFrom(
-              backgroundColor: dangerRed.withOpacity(0.1),
+              backgroundColor: dangerRed.withAlpha(26),
             ),
             child: const Text(
               "Delete",
@@ -646,7 +646,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: dangerRed.withOpacity(0.1),
+                color: dangerRed.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -679,7 +679,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               await _deleteAllLogs();
             },
             style: TextButton.styleFrom(
-              backgroundColor: dangerRed.withOpacity(0.1),
+              backgroundColor: dangerRed.withAlpha(26),
             ),
             child: const Text(
               "Delete All",
@@ -861,7 +861,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
             left: 0,
             right: 0,
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withAlpha(77),
               padding: const EdgeInsets.all(16),
               child: Center(
                 child: Text(
@@ -892,7 +892,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withAlpha(153),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const CircularProgressIndicator(
@@ -1014,7 +1014,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: primaryIndigo.withOpacity(0.1),
+                          color: primaryIndigo.withAlpha(26),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -1032,7 +1032,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: dangerRed.withOpacity(0.1),
+                            color: dangerRed.withAlpha(26),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
@@ -1075,8 +1075,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
                         height: 40,
                         decoration: BoxDecoration(
                           color: isGranted
-                              ? successGreen.withOpacity(0.2)
-                              : dangerRed.withOpacity(0.2),
+                              ? successGreen.withAlpha(51)
+                              : dangerRed.withAlpha(51),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -1116,10 +1116,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: entryType == 'IN'
-                                          ? successGreen.withOpacity(0.2)
+                                          ? successGreen.withAlpha(51)
                                           : const Color(
                                               0xFFEC4899,
-                                            ).withOpacity(0.2),
+                                            ).withAlpha(51),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
