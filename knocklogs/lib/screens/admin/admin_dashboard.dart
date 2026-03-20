@@ -3,10 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/admin_service.dart';
+
+import 'user_detail_view.dart';
+import '../landing/landing_page.dart';
+
 import '../../widgets/theme_toggle.dart';
 import '../auth/login_screen.dart';
 import 'admin_palette.dart';
 import 'user_detail_view.dart';
+
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -158,6 +163,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final user = _auth.currentUser;
     showGeneralDialog(
       context: context,
+
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
+            },
+            child: const Text(
+              "Logout",
+              style: TextStyle(color: Color(0xFFEF4444)),
+
       barrierDismissible: true,
       barrierLabel: 'Profile panel',
       barrierColor: Colors.black54,
@@ -349,6 +379,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         },
                       ),
               ),
+
             ),
           ),
         );

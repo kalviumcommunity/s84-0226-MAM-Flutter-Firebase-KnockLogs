@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../widgets/theme_toggle.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/guard_service.dart';
+import '../landing/landing_page.dart';
 
 class GuardDashboard extends StatefulWidget {
   const GuardDashboard({super.key});
@@ -22,10 +23,14 @@ class _GuardDashboardState extends State<GuardDashboard> {
   late MobileScannerController _cameraController;
   bool _isScanning = false;
   List<Map<String, dynamic>> _scanHistory = [];
+
+  final TextEditingController _manualQRController = TextEditingController();
+
   TextEditingController _manualQRController = TextEditingController();
   Map<String, dynamic>? _guardInfo;
   bool _isProfileLoading = true;
   int _currentTab = 0;
+
 
   // NOTE: _currentScanResult and _errorMessage were previously present but
   // not used anywhere else in the file. They were removed to clean analyzer
@@ -119,9 +124,13 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       } else {
         String entryType = result['entry_type'] ?? "IN";
+
+        String welcomeName = result['is_visitor'] == true ? result['visitor_name'] ?? 'Visitor' : result['resident_name'] ?? 'Unknown';
+
         String welcomeName = result['is_visitor'] == true
             ? result['visitor_name'] ?? 'Visitor'
             : result['resident_name'] ?? 'Unknown';
+
         _showValidationDialog(
           isValid: true,
           title: "Access Granted",
@@ -131,8 +140,10 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       }
 
+
       // result is used immediately when showing the dialog; no persistent
       // storage is required here.
+
     } catch (e) {
       _showErrorDialog("Error", "Failed to process QR: $e");
     } finally {
@@ -501,9 +512,15 @@ class _GuardDashboardState extends State<GuardDashboard> {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              _auth.signOut();
+            onPressed: () async {
               Navigator.pop(context);
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
             },
             child: const Text("Logout", style: TextStyle(color: dangerRed)),
           ),

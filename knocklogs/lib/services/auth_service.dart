@@ -19,7 +19,12 @@ class AuthService {
           .doc(uid)
           .get();
 
-      return doc['role']; // return role
+      if (!doc.exists) {
+        return null;
+      }
+
+      final data = doc.data() as Map<String, dynamic>?;
+      return data?['role'] as String?;
     } catch (e) {
       return null;
     }

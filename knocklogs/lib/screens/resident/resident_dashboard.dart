@@ -12,10 +12,18 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+import '../../services/resident_service.dart';
+import '../landing/landing_page.dart';
+
+
 import '../../providers/theme_provider.dart';
 import '../../services/resident_service.dart';
 import '../auth/login_screen.dart';
 import '../../widgets/theme_toggle.dart';
+
 
 class ResidentDashboard extends StatefulWidget {
   const ResidentDashboard({super.key});
@@ -259,12 +267,23 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
           ),
           TextButton(
             onPressed: () async {
+
+              Navigator.pop(context);
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
+
               await _auth.signOut();
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
+
             },
             child: const Text("Logout", style: TextStyle(color: dangerRed)),
           ),

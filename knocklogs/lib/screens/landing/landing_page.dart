@@ -237,6 +237,120 @@ class _LandingPageState extends State<LandingPage>
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28),
+
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Modern glassmorphism card
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(32),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            data.primaryColor.withOpacity(0.08),
+                            data.secondaryColor.withOpacity(0.04),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: data.primaryColor.withOpacity(0.2),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: data.primaryColor.withOpacity(0.1),
+                            blurRadius: 30,
+                            spreadRadius: 8,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 48),
+
+                          // Enhanced illustration with animations
+                          AnimatedBuilder(
+                            animation: _floatController,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(
+                                  0,
+                                  math.sin(_floatController.value * math.pi * 2) * 12,
+                                ),
+                                child: Container(
+                                  width: 260,
+                                  height: 260,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        data.primaryColor.withOpacity(0.15),
+                                        data.secondaryColor.withOpacity(0.05),
+                                        Colors.transparent,
+                                      ],
+                                      stops: const [0.0, 0.6, 1.0],
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: _buildModernIllustration(data, index, theme),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 48),
+
+                          // Modern title
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28),
+                            child: Text(
+                              data.title,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: theme.textColor,
+                                height: 1.3,
+                                letterSpacing: -0.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Modern description
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28),
+                            child: Text(
+                              data.description,
+                              style: TextStyle(
+                                fontSize: 14.5,
+                                color: theme.textColor.withOpacity(0.65),
+                                height: 1.7,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+
         child: SizedBox.expand(
           child: Container(
             decoration: BoxDecoration(
@@ -347,6 +461,7 @@ class _LandingPageState extends State<LandingPage>
               },
             ),
           ),
+
         ),
       ),
     );
