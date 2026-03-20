@@ -11,6 +11,21 @@ A modern visitor log management application built with Flutter and Firebase. Str
 - **Cloud Storage** - Secure file storage with Firebase Storage
 - **Cross-Platform** - Native support for Android, iOS, Web, Windows, macOS, and Linux
 
+## Role-Based Features
+
+### Admin
+- Generate QR codes
+- View all visitor logs
+- Manage residents
+
+### Guard
+- Scan visitor QR codes
+- Log visitor entry
+
+### Resident
+- View visitor history
+- Get real-time updates
+
 ## Application Workflow
 
 1. User logs in using Google Sign-In
