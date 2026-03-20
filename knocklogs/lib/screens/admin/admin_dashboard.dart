@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/admin_service.dart';
 import 'user_detail_view.dart';
-import '../auth/login_screen.dart';
+import '../landing/landing_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -94,12 +94,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           TextButton(
             onPressed: () async {
-              await _auth.signOut();
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
             },
             child: const Text(
               "Logout",

@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/guard_service.dart';
+import '../landing/landing_page.dart';
 
 class GuardDashboard extends StatefulWidget {
   const GuardDashboard({super.key});
@@ -18,10 +19,8 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
   late MobileScannerController _cameraController;
   bool _isScanning = false;
-  Map<String, dynamic>? _currentScanResult;
   List<Map<String, dynamic>> _scanHistory = [];
-  String? _errorMessage;
-  TextEditingController _manualQRController = TextEditingController();
+  final TextEditingController _manualQRController = TextEditingController();
 
   // Colors
   static const Color primaryIndigo = Color(0xFF6366F1);
@@ -65,8 +64,6 @@ class _GuardDashboardState extends State<GuardDashboard> {
 
     setState(() {
       _isScanning = true;
-      _currentScanResult = null;
-      _errorMessage = null;
     });
 
     try {
@@ -82,7 +79,6 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       } else {
         String entryType = result['entry_type'] ?? "IN";
-        String buttonText = entryType == "IN" ? "ENTRY" : "EXIT";
         String welcomeName = result['is_visitor'] == true ? result['visitor_name'] ?? 'Visitor' : result['resident_name'] ?? 'Unknown';
         _showValidationDialog(
           isValid: true,
@@ -93,9 +89,6 @@ class _GuardDashboardState extends State<GuardDashboard> {
         );
       }
 
-      setState(() {
-        _currentScanResult = result;
-      });
     } catch (e) {
       _showErrorDialog("Error", "Failed to process QR: $e");
     } finally {
@@ -464,9 +457,15 @@ class _GuardDashboardState extends State<GuardDashboard> {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              _auth.signOut();
+            onPressed: () async {
               Navigator.pop(context);
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
             },
             child: const Text(
               "Logout",
