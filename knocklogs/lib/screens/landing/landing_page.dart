@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -71,122 +72,147 @@ class _LandingPageState extends State<LandingPage>
         return Scaffold(
           backgroundColor: theme.backgroundColor,
           body: SafeArea(
-            child: Column(
-              children: [
-                // Modern header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [mediumGreen, darkGreen],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'KnockLogs',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            color: cream,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      _buildThemeToggle(theme),
-                    ],
-                  ),
-                ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final availableHeight = constraints.maxHeight;
+                final pageViewHeight = math
+                    .max(280.0, availableHeight * 0.55)
+                    .clamp(280.0, 460.0);
 
-                // Modern PageView with cards
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() => _currentPage = index);
-                    },
-                    itemCount: _pages.length,
-                    itemBuilder: (context, index) {
-                      return _buildModernCard(_pages[index], index, theme);
-                    },
-                  ),
-                ),
-
-                // Enhanced page indicators
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _pages.length,
-                      (index) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          height: 10,
-                          width: _currentPage == index ? 32 : 10,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index
-                                ? mediumGreen
-                                : mediumGreen.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(5),
-                            boxShadow: _currentPage == index
-                                ? [
-                                    BoxShadow(
-                                      color: mediumGreen.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      spreadRadius: 2,
-                                    ),
-                                  ]
-                                : null,
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: availableHeight),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // Modern header
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [mediumGreen, darkGreen],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  'KnockLogs',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: cream,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              const ThemeToggleButton(compact: true),
+                            ],
                           ),
                         ),
-                      ),
+
+                        // Modern PageView with cards
+                        SizedBox(
+                          height: pageViewHeight,
+                          child: PageView.builder(
+                            controller: _pageController,
+                            onPageChanged: (index) {
+                              setState(() => _currentPage = index);
+                            },
+                            itemCount: _pages.length,
+                            itemBuilder: (context, index) {
+                              return _buildModernCard(
+                                _pages[index],
+                                index,
+                                theme,
+                              );
+                            },
+                          ),
+                        ),
+
+                        // Enhanced page indicators
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              _pages.length,
+                              (index) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  height: 10,
+                                  width: _currentPage == index ? 32 : 10,
+                                  decoration: BoxDecoration(
+                                    color: _currentPage == index
+                                        ? mediumGreen
+                                        : mediumGreen.withOpacity(0.25),
+                                    borderRadius: BorderRadius.circular(5),
+                                    boxShadow: _currentPage == index
+                                        ? [
+                                            BoxShadow(
+                                              color: mediumGreen.withOpacity(
+                                                0.3,
+                                              ),
+                                              blurRadius: 8,
+                                              spreadRadius: 2,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Modern buttons
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                          child: Column(
+                            children: [
+                              _buildModernButton(
+                                label: 'Get Started',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    _createRoute(const RegisterScreen()),
+                                  );
+                                },
+                                isPrimary: true,
+                                theme: theme,
+                              ),
+                              const SizedBox(height: 14),
+                              _buildModernButton(
+                                label: 'Sign In',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    _createRoute(const LoginScreen()),
+                                  );
+                                },
+                                isPrimary: false,
+                                theme: theme,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-
-                // Modern buttons
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                  child: Column(
-                    children: [
-                      _buildModernButton(
-                        label: 'Get Started',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            _createRoute(const RegisterScreen()),
-                          );
-                        },
-                        isPrimary: true,
-                        theme: theme,
-                      ),
-                      const SizedBox(height: 14),
-                      _buildModernButton(
-                        label: 'Sign In',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            _createRoute(const LoginScreen()),
-                          );
-                        },
-                        isPrimary: false,
-                        theme: theme,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         );
@@ -194,60 +220,7 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 
-  Widget _buildThemeToggle(ThemeProvider theme) {
-    return GestureDetector(
-      onTap: theme.toggleTheme,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: theme.isDarkMode
-                ? [const Color(0xFF2E3A59).withOpacity(0.8), const Color(0xFF1A1F2E).withOpacity(0.8)]
-                : [mediumGreen.withOpacity(0.1), darkGreen.withOpacity(0.05)],
-          ),
-          border: Border.all(
-            color: theme.isDarkMode
-                ? const Color(0xFFF4E5A1).withOpacity(0.2)
-                : mediumGreen.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.isDarkMode
-                  ? const Color(0xFF2E3A59).withOpacity(0.2)
-                  : mediumGreen.withOpacity(0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: theme.toggleTheme,
-            borderRadius: BorderRadius.circular(14),
-            child: Center(
-              child: Icon(
-                theme.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                color: theme.isDarkMode ? const Color(0xFFF4E5A1) : mediumGreen,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernCard(
-    OnboardingData data,
-    int index,
-    ThemeProvider theme,
-  ) {
+  Widget _buildModernCard(OnboardingData data, int index, ThemeProvider theme) {
     return AnimatedBuilder(
       animation: _pageController,
       builder: (context, child) {
@@ -264,6 +237,7 @@ class _LandingPageState extends State<LandingPage>
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28),
+
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
@@ -376,6 +350,118 @@ class _LandingPageState extends State<LandingPage>
               ),
             );
           },
+
+        child: SizedBox.expand(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  data.primaryColor.withOpacity(0.08),
+                  data.secondaryColor.withOpacity(0.04),
+                ],
+              ),
+              border: Border.all(
+                color: data.primaryColor.withOpacity(0.2),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: data.primaryColor.withOpacity(0.1),
+                  blurRadius: 30,
+                  spreadRadius: 8,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final cardHeight = constraints.maxHeight;
+                final topSpace = (cardHeight * 0.08).clamp(24.0, 40.0);
+                final midSpace = (cardHeight * 0.07).clamp(20.0, 32.0);
+                final bottomSpace = (cardHeight * 0.08).clamp(24.0, 40.0);
+                final illustrationSize = (cardHeight * 0.45).clamp(
+                  160.0,
+                  240.0,
+                );
+                final titleSize = (cardHeight * 0.06).clamp(20.0, 28.0);
+                final descSize = (cardHeight * 0.032).clamp(12.0, 15.0);
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: topSpace),
+                    AnimatedBuilder(
+                      animation: _floatController,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(
+                            0,
+                            math.sin(_floatController.value * math.pi * 2) * 12,
+                          ),
+                          child: Container(
+                            width: illustrationSize,
+                            height: illustrationSize,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  data.primaryColor.withOpacity(0.15),
+                                  data.secondaryColor.withOpacity(0.05),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.6, 1.0],
+                              ),
+                            ),
+                            child: Center(
+                              child: _buildModernIllustration(
+                                data,
+                                index,
+                                theme,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: midSpace),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Text(
+                        data.title,
+                        style: TextStyle(
+                          fontSize: titleSize,
+                          fontWeight: FontWeight.w800,
+                          color: theme.textColor,
+                          height: 1.3,
+                          letterSpacing: -0.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Text(
+                        data.description,
+                        style: TextStyle(
+                          fontSize: descSize,
+                          color: theme.textColor.withOpacity(0.65),
+                          height: 1.6,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(height: bottomSpace),
+                  ],
+                );
+              },
+            ),
+          ),
+
         ),
       ),
     );
@@ -408,10 +494,7 @@ class _LandingPageState extends State<LandingPage>
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: orange.withOpacity(0.15),
-                width: 2,
-              ),
+              border: Border.all(color: orange.withOpacity(0.15), width: 2),
             ),
           ),
           // Main shapes
@@ -455,10 +538,7 @@ class _LandingPageState extends State<LandingPage>
                 height: 90,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      orange,
-                      orange.withOpacity(0.7),
-                    ],
+                    colors: [orange, orange.withOpacity(0.7)],
                   ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
@@ -507,7 +587,8 @@ class _LandingPageState extends State<LandingPage>
             return AnimatedBuilder(
               animation: _floatController,
               builder: (context, child) => Transform.rotate(
-                angle: _floatController.value *
+                angle:
+                    _floatController.value *
                     (i % 2 == 0 ? math.pi * 2 : -math.pi * 2),
                 child: Container(
                   width: 160.0 - (i * 35),
@@ -529,10 +610,7 @@ class _LandingPageState extends State<LandingPage>
             height: 40,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  orange,
-                  orange.withOpacity(0.6),
-                ],
+                colors: [orange, orange.withOpacity(0.6)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
@@ -563,24 +641,29 @@ class _LandingPageState extends State<LandingPage>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      (i == 0 ? orange : i == 1 ? data.primaryColor : darkGreen)
+                      (i == 0
+                              ? orange
+                              : i == 1
+                              ? data.primaryColor
+                              : darkGreen)
                           .withOpacity(0.9),
                       (i == 0
                               ? orange
                               : i == 1
-                                  ? data.primaryColor
-                                  : darkGreen)
+                              ? data.primaryColor
+                              : darkGreen)
                           .withOpacity(0.5),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (i == 0
-                              ? orange
-                              : i == 1
+                      color:
+                          (i == 0
+                                  ? orange
+                                  : i == 1
                                   ? data.primaryColor
                                   : darkGreen)
-                          .withOpacity(0.35),
+                              .withOpacity(0.35),
                       blurRadius: 18,
                       offset: Offset(0, 8 + i * 2),
                     ),
@@ -617,8 +700,6 @@ class _LandingPageState extends State<LandingPage>
     }
   }
 
-
-
   Widget _buildModernButton({
     required String label,
     required VoidCallback onPressed,
@@ -639,10 +720,7 @@ class _LandingPageState extends State<LandingPage>
             : null,
         border: isPrimary
             ? null
-            : Border.all(
-                color: mediumGreen.withOpacity(0.5),
-                width: 2,
-              ),
+            : Border.all(color: mediumGreen.withOpacity(0.5), width: 2),
         boxShadow: isPrimary
             ? [
                 BoxShadow(
@@ -659,7 +737,9 @@ class _LandingPageState extends State<LandingPage>
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
-          splashColor: isPrimary ? Colors.white.withOpacity(0.1) : mediumGreen.withOpacity(0.1),
+          splashColor: isPrimary
+              ? Colors.white.withOpacity(0.1)
+              : mediumGreen.withOpacity(0.1),
           child: Center(
             child: Text(
               label,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/admin_service.dart';
+import 'admin_palette.dart';
 
 class UserDetailView extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -47,7 +48,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error approving user: $e");
               }
             },
-            child: const Text("Approve", style: TextStyle(color: Color(0xFF10B981))),
+            child: const Text(
+              "Approve",
+              style: TextStyle(color: Color(0xFF10B981)),
+            ),
           ),
         ],
       ),
@@ -80,7 +84,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error rejecting user: $e");
               }
             },
-            child: const Text("Reject", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Reject",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -93,7 +100,9 @@ class _UserDetailViewState extends State<UserDetailView> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: const Text("Delete User"),
-        content: Text("Permanently delete ${user['name']}? This cannot be undone."),
+        content: Text(
+          "Permanently delete ${user['name']}? This cannot be undone.",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -111,7 +120,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error deleting user: $e");
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -138,38 +150,34 @@ class _UserDetailViewState extends State<UserDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AdminPalette.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: palette.background,
       appBar: AppBar(
-        elevation: 1,
-        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        backgroundColor: palette.surface,
         centerTitle: true,
         title: Text(
           user['name'] ?? 'User Details',
-          style: const TextStyle(
-            color: Color(0xFF1F2937),
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: palette.text, fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: const Color(0xFFE5E7EB),
-            height: 1,
-          ),
+          child: Container(color: palette.border, height: 1),
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildUserProfileCard(),
+            _buildUserProfileCard(palette),
             const SizedBox(height: 20),
-            _buildInfoSection(),
+            _buildInfoSection(palette),
             const SizedBox(height: 20),
-            _buildMetadataSection(),
+            _buildMetadataSection(palette),
             const SizedBox(height: 20),
-            _buildActionButtons(),
+            _buildActionButtons(palette),
             const SizedBox(height: 20),
           ],
         ),
@@ -177,7 +185,7 @@ class _UserDetailViewState extends State<UserDetailView> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(AdminPalette palette) {
     final status = user['status']?.toString().toLowerCase() ?? 'unknown';
     final isPending = status == 'pending';
 
@@ -192,9 +200,9 @@ class _UserDetailViewState extends State<UserDetailView> {
                   icon: const Icon(Icons.close, size: 18),
                   label: const Text("Reject"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF4444),
+                    backgroundColor: palette.danger,
                     foregroundColor: Colors.white,
-                    elevation: 2,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -209,9 +217,9 @@ class _UserDetailViewState extends State<UserDetailView> {
                   icon: const Icon(Icons.check, size: 18),
                   label: const Text("Approve"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
+                    backgroundColor: palette.success,
                     foregroundColor: Colors.white,
-                    elevation: 2,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -229,9 +237,9 @@ class _UserDetailViewState extends State<UserDetailView> {
               icon: const Icon(Icons.delete, size: 18),
               label: const Text("Delete User"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: palette.danger,
                 foregroundColor: Colors.white,
-                elevation: 2,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -243,23 +251,21 @@ class _UserDetailViewState extends State<UserDetailView> {
     );
   }
 
-  Widget _buildUserProfileCard() {
+  Widget _buildUserProfileCard(AdminPalette palette) {
     final role = user['role'] ?? 'unknown';
     final isGuard = role == 'guard';
+    final roleColor = isGuard ? palette.primary : palette.accent;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: palette.border, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(palette.isDark ? 0.2 : 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -268,32 +274,26 @@ class _UserDetailViewState extends State<UserDetailView> {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundColor: isGuard
-                ? const Color(0xFF6366F1).withOpacity(0.1)
-                : const Color(0xFF06B6D4).withOpacity(0.1),
+            backgroundColor: roleColor.withOpacity(0.12),
             child: Icon(
               isGuard ? Icons.security : Icons.home,
               size: 50,
-              color: isGuard
-                  ? const Color(0xFF6366F1)
-                  : const Color(0xFF06B6D4),
+              color: roleColor,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             user['name'] ?? 'Unknown',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+              color: palette.text,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: isGuard
-                  ? const Color(0xFF6366F1).withOpacity(0.1)
-                  : const Color(0xFF06B6D4).withOpacity(0.1),
+              color: roleColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -302,40 +302,33 @@ class _UserDetailViewState extends State<UserDetailView> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: isGuard
-                    ? const Color(0xFF6366F1)
-                    : const Color(0xFF06B6D4),
+                color: roleColor,
                 letterSpacing: 0.5,
               ),
             ),
           ),
           const SizedBox(height: 12),
-          _buildStatusBadge(),
+          _buildStatusBadge(palette),
         ],
       ),
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(AdminPalette palette) {
     final status = user['status'] ?? 'unknown';
     final isApproved = status.toLowerCase() == 'approved';
+    final isPending = status.toLowerCase() == 'pending';
+    final badgeColor = isApproved
+        ? palette.success
+        : isPending
+        ? palette.warning
+        : palette.danger;
 
     return Container(
       decoration: BoxDecoration(
-        color: isApproved
-            ? const Color(0xFF10B981).withOpacity(0.1)
-            : status.toLowerCase() == 'pending'
-                ? const Color(0xFFFFD700).withOpacity(0.1)
-                : const Color(0xFFEF4444).withOpacity(0.1),
+        color: badgeColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isApproved
-              ? const Color(0xFF10B981)
-              : status.toLowerCase() == 'pending'
-                  ? const Color(0xFFB8860B)
-                  : const Color(0xFFEF4444),
-          width: 1,
-        ),
+        border: Border.all(color: badgeColor, width: 1),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -344,14 +337,10 @@ class _UserDetailViewState extends State<UserDetailView> {
           Icon(
             isApproved
                 ? Icons.check_circle
-                : status.toLowerCase() == 'pending'
-                    ? Icons.schedule
-                    : Icons.cancel,
-            color: isApproved
-                ? const Color(0xFF10B981)
-                : status.toLowerCase() == 'pending'
-                    ? const Color(0xFFB8860B)
-                    : const Color(0xFFEF4444),
+                : isPending
+                ? Icons.schedule
+                : Icons.cancel,
+            color: badgeColor,
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -360,11 +349,7 @@ class _UserDetailViewState extends State<UserDetailView> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: isApproved
-                  ? const Color(0xFF10B981)
-                  : status.toLowerCase() == 'pending'
-                      ? const Color(0xFFB8860B)
-                      : const Color(0xFFEF4444),
+              color: badgeColor,
               letterSpacing: 0.5,
             ),
           ),
@@ -373,27 +358,29 @@ class _UserDetailViewState extends State<UserDetailView> {
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(AdminPalette palette) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "PERSONAL INFORMATION",
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF6B7280),
+            color: palette.textSecondary,
             letterSpacing: 1,
           ),
         ),
         const SizedBox(height: 12),
         _buildInfoCard(
+          palette: palette,
           icon: Icons.email,
           label: "Email",
           value: user['email'] ?? 'N/A',
         ),
         const SizedBox(height: 10),
         _buildInfoCard(
+          palette: palette,
           icon: Icons.phone,
           label: "Phone",
           value: user['phone'] ?? 'N/A',
@@ -401,6 +388,7 @@ class _UserDetailViewState extends State<UserDetailView> {
         const SizedBox(height: 10),
         if (user['role'] == 'resident')
           _buildInfoCard(
+            palette: palette,
             icon: Icons.home,
             label: "Flat Number",
             value: user['flatNo'] ?? 'N/A',
@@ -410,29 +398,27 @@ class _UserDetailViewState extends State<UserDetailView> {
   }
 
   Widget _buildInfoCard({
+    required AdminPalette palette,
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.border, width: 1),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: palette.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: const Color(0xFF6366F1), size: 20),
+            child: Icon(icon, color: palette.primary, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -441,9 +427,9 @@ class _UserDetailViewState extends State<UserDetailView> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF6B7280),
+                    color: palette.textSecondary,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.5,
                   ),
@@ -451,9 +437,9 @@ class _UserDetailViewState extends State<UserDetailView> {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
-                    color: Color(0xFF1F2937),
+                    color: palette.text,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,
@@ -467,7 +453,7 @@ class _UserDetailViewState extends State<UserDetailView> {
     );
   }
 
-  Widget _buildMetadataSection() {
+  Widget _buildMetadataSection(AdminPalette palette) {
     final createdAt = user['createdAt'];
     String formattedDate = 'N/A';
 
@@ -482,23 +468,20 @@ class _UserDetailViewState extends State<UserDetailView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.border, width: 1),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "ACCOUNT INFORMATION",
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF6B7280),
+              color: palette.textSecondary,
               letterSpacing: 1,
             ),
           ),
@@ -511,24 +494,27 @@ class _UserDetailViewState extends State<UserDetailView> {
                 children: [
                   Text(
                     "User ID",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF6B7280),
+                      color: palette.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(6),
+                      color: palette.muted,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     child: Text(
                       user['id']?.substring(0, 8) ?? 'N/A',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF6366F1),
+                        color: palette.primary,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
                       ),
@@ -539,20 +525,20 @@ class _UserDetailViewState extends State<UserDetailView> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     "Registered",
                     style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF6B7280),
+                      color: palette.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     formattedDate,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF1F2937),
+                      color: palette.text,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

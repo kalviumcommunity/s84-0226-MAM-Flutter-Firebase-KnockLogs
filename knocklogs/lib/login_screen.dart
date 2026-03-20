@@ -29,15 +29,15 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       print("🔵 Starting Google Sign-In...");
       final user = await _googleAuthService.signInWithGoogle();
-      
+
       print("🔍 User object: $user");
       print("🔍 User UID: ${user?.uid}");
       print("🔍 User Email: ${user?.email}");
-      
+
       if (user != null) {
         print("✅ User authenticated successfully!");
         print("📍 Attempting navigation...");
-        
+
         if (mounted) {
           print("✅ Widget still mounted, navigating now...");
           Navigator.of(context).pushAndRemoveUntil(
@@ -59,9 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       print("❌ Error during Google Sign-In: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -94,16 +94,16 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid credentials')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Invalid credentials')));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -115,9 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("KnockLogs Login"),
-      ),
+      appBar: AppBar(title: const Text("KnockLogs Login")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -178,7 +176,10 @@ class _LoginScreenState extends State<LoginScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(height: 20),

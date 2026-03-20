@@ -48,3 +48,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub/
+build/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
