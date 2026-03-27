@@ -4,21 +4,20 @@ class GuardService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Validate QR and get resident info
-  Future<Map<String, dynamic>?> validateQRAndGetResidentInfo(String qrData) async {
+  Future<Map<String, dynamic>?> validateQRAndGetResidentInfo(
+    String qrData,
+  ) async {
     try {
       // Check if it's a visitor QR
       List<String> parts = qrData.split("|");
       if (parts.isNotEmpty && parts[0] == "visitor") {
         return await _validateVisitorQR(qrData);
       }
-      
+
       // Otherwise validate as resident QR
       return await _validateResidentQR(qrData);
     } catch (e) {
-      return {
-        "valid": false,
-        "reason": "Error validating QR: $e",
-      };
+      return {"valid": false, "reason": "Error validating QR: $e"};
     }
   }
 
@@ -41,18 +40,18 @@ class GuardService {
           .get();
 
       if (!visitorQrDoc.exists) {
-        return {
-          "valid": false,
-          "reason": "Visitor QR not found",
-        };
+        return {"valid": false, "reason": "Visitor QR not found"};
       }
 
-      Map<String, dynamic> visitorQrData = visitorQrDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> visitorQrData =
+          visitorQrDoc.data() as Map<String, dynamic>;
 
       // Validate resident_id from document matches parsed resident_id
       String docResidentId = visitorQrData['resident_id'] ?? '';
       if (docResidentId != parsedResidentId) {
-        print("ERROR: Resident ID mismatch! QR: $parsedResidentId, Doc: $docResidentId");
+        print(
+          "ERROR: Resident ID mismatch! QR: $parsedResidentId, Doc: $docResidentId",
+        );
         return {
           "valid": false,
           "reason": "QR validation failed - resident mismatch",
@@ -60,7 +59,8 @@ class GuardService {
       }
 
       // Check if QR is valid and not expired BEFORE fetching resident info
-      DateTime? expiresAt = (visitorQrData['expires_at'] as Timestamp?)?.toDate();
+      DateTime? expiresAt = (visitorQrData['expires_at'] as Timestamp?)
+          ?.toDate();
       DateTime now = DateTime.now();
 
       if (!visitorQrData['is_valid'] ||
@@ -83,29 +83,32 @@ class GuardService {
           .get();
 
       if (!residentDoc.exists) {
-        print("ERROR: Resident user document not found for ID: $parsedResidentId");
-        return {
-          "valid": false,
-          "reason": "Resident not found",
-        };
+        print(
+          "ERROR: Resident user document not found for ID: $parsedResidentId",
+        );
+        return {"valid": false, "reason": "Resident not found"};
       }
 
-      Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> residentData =
+          residentDoc.data() as Map<String, dynamic>;
 
       // Check if resident is approved
       if (residentData['status'] != 'approved') {
-        return {
-          "valid": false,
-          "reason": "Resident not approved",
-        };
+        return {"valid": false, "reason": "Resident not approved"};
       }
 
       // Use resident details from visitorQrData if available (as source of truth),
       // otherwise fall back to users collection data
-      String residentName = visitorQrData['resident_name'] ?? residentData['name'] ?? "Unknown";
-      String residentPhone = visitorQrData['resident_phone'] ?? residentData['phone'] ?? "Not provided";
-      String residentEmail = visitorQrData['resident_email'] ?? residentData['email'] ?? "Unknown";
-      String flatNumber = visitorQrData['flat_number'] ?? residentData['flatNo'] ?? "Unknown";
+      String residentName =
+          visitorQrData['resident_name'] ?? residentData['name'] ?? "Unknown";
+      String residentPhone =
+          visitorQrData['resident_phone'] ??
+          residentData['phone'] ??
+          "Not provided";
+      String residentEmail =
+          visitorQrData['resident_email'] ?? residentData['email'] ?? "Unknown";
+      String flatNumber =
+          visitorQrData['flat_number'] ?? residentData['flatNo'] ?? "Unknown";
 
       return {
         "valid": true,
@@ -124,10 +127,7 @@ class GuardService {
       };
     } catch (e) {
       print("ERROR in _validateVisitorQR: $e");
-      return {
-        "valid": false,
-        "reason": "Error validating visitor QR: $e",
-      };
+      return {"valid": false, "reason": "Error validating visitor QR: $e"};
     }
   }
 
@@ -142,13 +142,17 @@ class GuardService {
       String qrId = parts[1];
 
       // Get resident info
-      DocumentSnapshot residentDoc = await _firestore.collection("users").doc(residentId).get();
+      DocumentSnapshot residentDoc = await _firestore
+          .collection("users")
+          .doc(residentId)
+          .get();
 
       if (!residentDoc.exists) {
         return null; // Resident not found
       }
 
-      Map<String, dynamic> residentData = residentDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> residentData =
+          residentDoc.data() as Map<String, dynamic>;
 
       // Check if user is actually a resident (not a guard)
       if (residentData['role'] != 'resident') {
@@ -181,9 +185,11 @@ class GuardService {
       if (phoneNumber.isEmpty) {
         phoneNumber = "Not provided";
         // Update in Firestore for future use
-        await _firestore.collection("users").doc(residentId).update({
-          "phone": phoneNumber,
-        }).catchError((e) => print("Error updating phone: $e"));
+        await _firestore
+            .collection("users")
+            .doc(residentId)
+            .update({"phone": phoneNumber})
+            .catchError((e) => print("Error updating phone: $e"));
       }
 
       // Check QR session validity
@@ -205,7 +211,7 @@ class GuardService {
       if (!qrValid) {
         String phoneNum = residentData['phone'] ?? "";
         if (phoneNum.isEmpty) phoneNum = "Not provided";
-        
+
         return {
           "valid": false,
           "reason": "Invalid or expired QR code",
@@ -223,7 +229,7 @@ class GuardService {
       // QR is valid - return resident info
       String phoneNum = residentData['phone'] ?? "";
       if (phoneNum.isEmpty) phoneNum = "Not provided";
-      
+
       return {
         "valid": true,
         "resident_id": residentId,
@@ -236,10 +242,7 @@ class GuardService {
         "entry_type": entryType,
       };
     } catch (e) {
-      return {
-        "valid": false,
-        "reason": "Error validating QR: $e",
-      };
+      return {"valid": false, "reason": "Error validating QR: $e"};
     }
   }
 
@@ -506,7 +509,10 @@ class GuardService {
   // Helper to get resident name
   Future<String> _getResidentName(String residentId) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection("users").doc(residentId).get();
+      DocumentSnapshot doc = await _firestore
+          .collection("users")
+          .doc(residentId)
+          .get();
       if (doc.exists) {
         return (doc.data() as Map<String, dynamic>)['name'] ?? "Unknown";
       }
@@ -528,10 +534,7 @@ class GuardService {
           .get();
 
       return snapshot.docs
-          .map((doc) => {
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map((doc) => {"id": doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
     } catch (e) {
       throw Exception("Error fetching scan history: $e");

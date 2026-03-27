@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class GoogleAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   // Initialize GoogleSignIn with Web Client ID for web platform
   late final GoogleSignIn _googleSignIn;
 
@@ -19,9 +19,7 @@ class GoogleAuthService {
       );
     } else {
       // For mobile platforms
-      _googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
+      _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
     }
   }
 
@@ -39,8 +37,9 @@ class GoogleAuthService {
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
 
       User? user = userCredential.user;
 
@@ -62,7 +61,9 @@ class GoogleAuthService {
           }
           print("✅ User saved to Firestore successfully");
         } catch (firestoreError) {
-          print("⚠️ Firestore save error (but user auth succeeded): $firestoreError");
+          print(
+            "⚠️ Firestore save error (but user auth succeeded): $firestoreError",
+          );
           // Don't block navigation even if Firestore save fails
           // User is authenticated via Firebase Auth
         }

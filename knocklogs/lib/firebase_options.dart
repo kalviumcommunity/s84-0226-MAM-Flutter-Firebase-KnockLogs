@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'knocklogs.firebasestorage.app',
     measurementId: 'G-YTC2W2PEJM',
   );
-
 }

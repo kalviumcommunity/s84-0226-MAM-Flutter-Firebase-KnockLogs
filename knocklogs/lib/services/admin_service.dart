@@ -9,12 +9,14 @@ class AdminService {
           .collection("users")
           .where("status", isEqualTo: "pending")
           .get();
-      
+
       return snapshot.docs
-          .map((doc) => <String, dynamic>{
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map(
+            (doc) => <String, dynamic>{
+              "id": doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            },
+          )
           .toList();
     } catch (e) {
       throw Exception("Error fetching pending requests: $e");
@@ -28,14 +30,16 @@ class AdminService {
           .collection("users")
           .where("role", isEqualTo: "guard")
           .get();
-      
+
       final allGuards = snapshot.docs
-          .map((doc) => <String, dynamic>{
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map(
+            (doc) => <String, dynamic>{
+              "id": doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            },
+          )
           .toList();
-      
+
       // Filter to only approved guards
       return allGuards.where((g) => g['status'] == 'approved').toList();
     } catch (e) {
@@ -50,14 +54,16 @@ class AdminService {
           .collection("users")
           .where("role", isEqualTo: "resident")
           .get();
-      
+
       final allResidents = snapshot.docs
-          .map((doc) => <String, dynamic>{
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map(
+            (doc) => <String, dynamic>{
+              "id": doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            },
+          )
           .toList();
-      
+
       // Filter to approved only
       return allResidents.where((r) => r['status'] == 'approved').toList();
     } catch (e) {
@@ -72,12 +78,14 @@ class AdminService {
           .collection("users")
           .where("role", isEqualTo: "resident")
           .get();
-      
+
       return snapshot.docs
-          .map((doc) => <String, dynamic>{
-                "id": doc.id,
-                ...doc.data() as Map<String, dynamic>,
-              })
+          .map(
+            (doc) => <String, dynamic>{
+              "id": doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            },
+          )
           .toList();
     } catch (e) {
       throw Exception("Error fetching all residents: $e");
@@ -114,9 +122,7 @@ class AdminService {
 
   Future<void> updateUserStatus(String uid, String status) async {
     try {
-      await _firestore.collection("users").doc(uid).update({
-        "status": status,
-      });
+      await _firestore.collection("users").doc(uid).update({"status": status});
     } catch (e) {
       throw Exception("Error updating user status: $e");
     }
@@ -127,12 +133,11 @@ class AdminService {
         .collection("users")
         .where("status", isEqualTo: "pending")
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => <String, dynamic>{
-                  "id": doc.id,
-                  ...doc.data(),
-                })
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => <String, dynamic>{"id": doc.id, ...doc.data()})
+              .toList(),
+        );
   }
 
   Stream<List<Map<String, dynamic>>> getGuardsStream() {
@@ -140,13 +145,12 @@ class AdminService {
         .collection("users")
         .where("role", isEqualTo: "guard")
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .where((doc) => doc['status'] == 'approved')
-            .map((doc) => <String, dynamic>{
-                  "id": doc.id,
-                  ...doc.data(),
-                })
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .where((doc) => doc['status'] == 'approved')
+              .map((doc) => <String, dynamic>{"id": doc.id, ...doc.data()})
+              .toList(),
+        );
   }
 
   Stream<List<Map<String, dynamic>>> getResidentsStream() {
@@ -154,12 +158,11 @@ class AdminService {
         .collection("users")
         .where("role", isEqualTo: "resident")
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .where((doc) => doc['status'] == 'approved')
-            .map((doc) => <String, dynamic>{
-                  "id": doc.id,
-                  ...doc.data(),
-                })
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .where((doc) => doc['status'] == 'approved')
+              .map((doc) => <String, dynamic>{"id": doc.id, ...doc.data()})
+              .toList(),
+        );
   }
 }

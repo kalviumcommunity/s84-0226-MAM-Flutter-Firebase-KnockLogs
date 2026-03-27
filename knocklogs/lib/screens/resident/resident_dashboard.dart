@@ -152,10 +152,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                 );
               }
             },
-            child: const Text(
-              "Logout",
-              style: TextStyle(color: dangerRed),
-            ),
+            child: const Text("Logout", style: TextStyle(color: dangerRed)),
           ),
         ],
       ),
@@ -222,7 +219,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               await _updatePhone(phoneController.text.trim());
             },
             style: TextButton.styleFrom(
-              backgroundColor: primaryIndigo.withOpacity(0.1),
+              backgroundColor: primaryIndigo.withValues(alpha: 0.1),
             ),
             child: const Text(
               "Update",
@@ -257,8 +254,8 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorWidget()
-              : _buildContent(),
+          ? _buildErrorWidget()
+          : _buildContent(),
       floatingActionButton: FloatingActionButton(
         onPressed: _generateNewQR,
         backgroundColor: primaryIndigo,
@@ -399,9 +396,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
             else
               const SizedBox(
                 height: 250,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: Center(child: CircularProgressIndicator()),
               ),
             const SizedBox(height: 20),
             // QR Data Display Section for Manual Testing
@@ -447,8 +442,12 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () {
-                          Clipboard.setData(ClipboardData(text: _currentQRData ?? ""));
-                          _showSuccessSnackbar("QR data copied! Paste it in Guard Dashboard");
+                          Clipboard.setData(
+                            ClipboardData(text: _currentQRData ?? ""),
+                          );
+                          _showSuccessSnackbar(
+                            "QR data copied! Paste it in Guard Dashboard",
+                          );
                         },
                         child: Container(
                           padding: const EdgeInsets.all(8),
@@ -531,8 +530,8 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
                 color: _residentInfo!['status'] == 'approved'
-                    ? successGreen.withOpacity(0.1)
-                    : warningorange.withOpacity(0.1),
+                    ? successGreen.withValues(alpha: 0.1)
+                    : warningorange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -635,14 +634,10 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: primaryIndigo.withOpacity(0.1),
+                color: primaryIndigo.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(
-                Icons.edit,
-                size: 16,
-                color: primaryIndigo,
-              ),
+              child: Icon(Icons.edit, size: 16, color: primaryIndigo),
             ),
           ),
         ],
@@ -736,9 +731,9 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         children: [
@@ -838,7 +833,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                   return Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: dangerRed.withOpacity(0.1),
+                      color: dangerRed.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -853,17 +848,16 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: textLight.withOpacity(0.1),
+                      color: textLight.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: textLight.withOpacity(0.2)),
+                      border: Border.all(
+                        color: textLight.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Center(
                       child: Text(
                         "No active visitor QR codes",
-                        style: TextStyle(
-                          color: textLight,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: textLight, fontSize: 12),
                       ),
                     ),
                   );
@@ -872,18 +866,19 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                 return Column(
                   children: List.generate(visitors.length, (index) {
                     final visitor = visitors[index];
-                    final expiresAt =
-                        (visitor['expires_at'] as Timestamp).toDate();
-                    final timeRemaining =
-                        expiresAt.difference(DateTime.now()).inHours;
+                    final expiresAt = (visitor['expires_at'] as Timestamp)
+                        .toDate();
+                    final timeRemaining = expiresAt
+                        .difference(DateTime.now())
+                        .inHours;
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: primaryIndigo.withOpacity(0.05),
+                        color: primaryIndigo.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: primaryIndigo.withOpacity(0.2),
+                          color: primaryIndigo.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -924,9 +919,12 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: warningorange.withOpacity(0.2),
-                                          borderRadius:
-                                              BorderRadius.circular(4),
+                                          color: warningorange.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                         child: Text(
                                           'Expires: ${DateFormat('hh:mm a').format(expiresAt)} (${timeRemaining}h left)',
@@ -1120,9 +1118,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, size: 18),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 10,
@@ -1171,10 +1167,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
       Navigator.pop(context);
       _showSuccessSnackbar("Visitor QR created successfully!");
       setState(() {}); // Refresh the visitor list
-      _showVisitorQRDialog({
-        'visitor_name': name,
-        'qr_data': qrData,
-      });
+      _showVisitorQRDialog({'visitor_name': name, 'qr_data': qrData});
     } catch (e) {
       Navigator.pop(context);
       _showErrorSnackbar("Failed to create visitor QR: $e");
@@ -1239,7 +1232,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: primaryIndigo.withOpacity(0.1),
+                    color: primaryIndigo.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1259,16 +1252,13 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
-                          backgroundColor: textLight.withOpacity(0.1),
+                          backgroundColor: textLight.withValues(alpha: 0.1),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
-                          "Close",
-                          style: TextStyle(color: textDark),
-                        ),
+                        child: Text("Close", style: TextStyle(color: textDark)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -1298,7 +1288,8 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
 
   Future<void> _shareVisitorQR(String qrData, String visitorName) async {
     try {
-      final shareText = '''🔐 VISITOR QR CODE
+      final shareText =
+          '''🔐 VISITOR QR CODE
 
 Visitor: $visitorName
 
@@ -1325,8 +1316,11 @@ KnockLogs - Secure Entry Management''';
           );
 
           final pictureRecorder = ui.PictureRecorder();
-          final canvas = ui.Canvas(pictureRecorder, Rect.fromLTWH(0, 0, 300, 300));
-          
+          final canvas = ui.Canvas(
+            pictureRecorder,
+            Rect.fromLTWH(0, 0, 300, 300),
+          );
+
           // Draw white background
           canvas.drawRect(
             Rect.fromLTWH(0, 0, 300, 300),
@@ -1338,11 +1332,14 @@ KnockLogs - Secure Entry Management''';
 
           final picture = pictureRecorder.endRecording();
           final image = await picture.toImage(300, 300);
-          final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+          final byteData = await image.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
 
           if (byteData != null) {
             final directory = await getTemporaryDirectory();
-            final imagePath = '${directory.path}/visitor_qr_${DateTime.now().millisecondsSinceEpoch}.png';
+            final imagePath =
+                '${directory.path}/visitor_qr_${DateTime.now().millisecondsSinceEpoch}.png';
             final imageFile = File(imagePath);
 
             // Write PNG file
@@ -1370,10 +1367,7 @@ KnockLogs - Secure Entry Management''';
       }
 
       // Fallback: Text-only share (web and mobile if image fails)
-      await Share.share(
-        shareText,
-        subject: 'Visitor QR Code - $visitorName',
-      );
+      await Share.share(shareText, subject: 'Visitor QR Code - $visitorName');
 
       _showSuccessSnackbar("QR code shared successfully!");
     } catch (e) {
@@ -1405,9 +1399,7 @@ KnockLogs - Secure Entry Management''';
                 _showErrorSnackbar("Failed to revoke QR: $e");
               }
             },
-            style: TextButton.styleFrom(
-              foregroundColor: dangerRed,
-            ),
+            style: TextButton.styleFrom(foregroundColor: dangerRed),
             child: const Text("Revoke"),
           ),
         ],
@@ -1431,7 +1423,9 @@ KnockLogs - Secure Entry Management''';
         if (_accessLogs.isEmpty)
           Card(
             elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             color: cardWhite,
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -1469,8 +1463,8 @@ KnockLogs - Secure Entry Management''';
                         height: 50,
                         decoration: BoxDecoration(
                           color: isGranted
-                              ? successGreen.withOpacity(0.2)
-                              : dangerRed.withOpacity(0.2),
+                              ? successGreen.withValues(alpha: 0.2)
+                              : dangerRed.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -1495,10 +1489,7 @@ KnockLogs - Secure Entry Management''';
                             const SizedBox(height: 4),
                             Text(
                               DateFormat("MMM dd, HH:mm").format(timestamp),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: textLight,
-                              ),
+                              style: TextStyle(fontSize: 12, color: textLight),
                             ),
                           ],
                         ),
@@ -1515,8 +1506,10 @@ KnockLogs - Secure Entry Management''';
                                 ),
                                 decoration: BoxDecoration(
                                   color: log['type'] == 'IN'
-                                      ? successGreen.withOpacity(0.2)
-                                      : const Color(0xFFEC4899).withOpacity(0.2),
+                                      ? successGreen.withValues(alpha: 0.2)
+                                      : const Color(
+                                          0xFFEC4899,
+                                        ).withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(

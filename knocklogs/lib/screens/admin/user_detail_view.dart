@@ -47,7 +47,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error approving user: $e");
               }
             },
-            child: const Text("Approve", style: TextStyle(color: Color(0xFF10B981))),
+            child: const Text(
+              "Approve",
+              style: TextStyle(color: Color(0xFF10B981)),
+            ),
           ),
         ],
       ),
@@ -80,7 +83,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error rejecting user: $e");
               }
             },
-            child: const Text("Reject", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Reject",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -93,7 +99,9 @@ class _UserDetailViewState extends State<UserDetailView> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: const Text("Delete User"),
-        content: Text("Permanently delete ${user['name']}? This cannot be undone."),
+        content: Text(
+          "Permanently delete ${user['name']}? This cannot be undone.",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -111,7 +119,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                 _showError("Error deleting user: $e");
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Color(0xFFEF4444))),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
           ),
         ],
       ),
@@ -153,10 +164,7 @@ class _UserDetailViewState extends State<UserDetailView> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: const Color(0xFFE5E7EB),
-            height: 1,
-          ),
+          child: Container(color: const Color(0xFFE5E7EB), height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -251,13 +259,10 @@ class _UserDetailViewState extends State<UserDetailView> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -269,8 +274,8 @@ class _UserDetailViewState extends State<UserDetailView> {
           CircleAvatar(
             radius: 50,
             backgroundColor: isGuard
-                ? const Color(0xFF6366F1).withOpacity(0.1)
-                : const Color(0xFF06B6D4).withOpacity(0.1),
+                ? const Color(0xFF6366F1).withValues(alpha: 0.1)
+                : const Color(0xFF06B6D4).withValues(alpha: 0.1),
             child: Icon(
               isGuard ? Icons.security : Icons.home,
               size: 50,
@@ -292,8 +297,8 @@ class _UserDetailViewState extends State<UserDetailView> {
           Container(
             decoration: BoxDecoration(
               color: isGuard
-                  ? const Color(0xFF6366F1).withOpacity(0.1)
-                  : const Color(0xFF06B6D4).withOpacity(0.1),
+                  ? const Color(0xFF6366F1).withValues(alpha: 0.1)
+                  : const Color(0xFF06B6D4).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -323,17 +328,17 @@ class _UserDetailViewState extends State<UserDetailView> {
     return Container(
       decoration: BoxDecoration(
         color: isApproved
-            ? const Color(0xFF10B981).withOpacity(0.1)
+            ? const Color(0xFF10B981).withValues(alpha: 0.1)
             : status.toLowerCase() == 'pending'
-                ? const Color(0xFFFFD700).withOpacity(0.1)
-                : const Color(0xFFEF4444).withOpacity(0.1),
+            ? const Color(0xFFFFD700).withValues(alpha: 0.1)
+            : const Color(0xFFEF4444).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isApproved
               ? const Color(0xFF10B981)
               : status.toLowerCase() == 'pending'
-                  ? const Color(0xFFB8860B)
-                  : const Color(0xFFEF4444),
+              ? const Color(0xFFB8860B)
+              : const Color(0xFFEF4444),
           width: 1,
         ),
       ),
@@ -345,13 +350,13 @@ class _UserDetailViewState extends State<UserDetailView> {
             isApproved
                 ? Icons.check_circle
                 : status.toLowerCase() == 'pending'
-                    ? Icons.schedule
-                    : Icons.cancel,
+                ? Icons.schedule
+                : Icons.cancel,
             color: isApproved
                 ? const Color(0xFF10B981)
                 : status.toLowerCase() == 'pending'
-                    ? const Color(0xFFB8860B)
-                    : const Color(0xFFEF4444),
+                ? const Color(0xFFB8860B)
+                : const Color(0xFFEF4444),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -363,8 +368,8 @@ class _UserDetailViewState extends State<UserDetailView> {
               color: isApproved
                   ? const Color(0xFF10B981)
                   : status.toLowerCase() == 'pending'
-                      ? const Color(0xFFB8860B)
-                      : const Color(0xFFEF4444),
+                  ? const Color(0xFFB8860B)
+                  : const Color(0xFFEF4444),
               letterSpacing: 0.5,
             ),
           ),
@@ -418,17 +423,14 @@ class _UserDetailViewState extends State<UserDetailView> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.1),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(10),
@@ -484,10 +486,7 @@ class _UserDetailViewState extends State<UserDetailView> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -523,7 +522,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                       color: const Color(0xFFF3F4F6),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     child: Text(
                       user['id']?.substring(0, 8) ?? 'N/A',
                       style: const TextStyle(
