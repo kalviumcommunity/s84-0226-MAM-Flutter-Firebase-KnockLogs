@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -161,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               padding: const EdgeInsets.all(12),
                             ),
                           ),
-                          _buildThemeToggle(theme),
+                          const ThemeToggleButton(),
                         ],
                       ),
 
@@ -544,7 +546,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                             ),
                           ),
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginScreen(),
+                                ),
+                              );
+                            },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),
@@ -574,6 +583,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+ 
   Widget _buildThemeToggle(ThemeProvider theme) {
     return GestureDetector(
       onTap: theme.toggleTheme,
@@ -693,6 +703,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+ 
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

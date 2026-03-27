@@ -7,7 +7,11 @@ import 'screens/landing/landing_page.dart';
 import 'counter_screen.dart';
 import 'providers/theme_provider.dart';
 
+/// Entry point of the application
+/// Initializes Firebase and runs the app
+
 void main() async {
+  // Initialize Firebase before running the app
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
@@ -20,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
+
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: StreamBuilder<User?>(
@@ -40,6 +45,32 @@ class MyApp extends StatelessWidget {
             return const LandingPage();
           },
         ),
+
+      child: Consumer<ThemeProvider>(
+        builder: (context, theme, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.light,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: theme.primaryColor,
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: theme.primaryColor,
+                brightness: Brightness.dark,
+              ),
+            ),
+            themeMode: theme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: const LandingPage(),
+          );
+        },
+
       ),
     );
   }

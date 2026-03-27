@@ -90,6 +90,43 @@ class ResidentService {
     }
   }
 
+  Future<void> deleteAccessLog(String logId) async {
+    try {
+      String? uid = _auth.currentUser?.uid;
+      if (uid == null) throw Exception("User not authenticated");
+
+      await _firestore
+          .collection("residents")
+          .doc(uid)
+          .collection("access_logs")
+          .doc(logId)
+          .delete();
+    } catch (e) {
+      throw Exception("Error deleting access log: $e");
+    }
+  }
+
+  Future<void> clearAccessLogs() async {
+    try {
+      String? uid = _auth.currentUser?.uid;
+      if (uid == null) throw Exception("User not authenticated");
+
+      final snapshot = await _firestore
+          .collection("residents")
+          .doc(uid)
+          .collection("access_logs")
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } catch (e) {
+      throw Exception("Error clearing access logs: $e");
+    }
+  }
+
   // Update resident phone number
   Future<void> updatePhone(String phone) async {
     try {
@@ -101,6 +138,22 @@ class ResidentService {
       });
     } catch (e) {
       throw Exception("Error updating phone: $e");
+    }
+  }
+
+  Future<void> updateResidentProfile(Map<String, dynamic> updates) async {
+    try {
+      String? uid = _auth.currentUser?.uid;
+      if (uid == null) throw Exception("User not authenticated");
+
+      final payload = <String, dynamic>{
+        for (final entry in updates.entries)
+          if (entry.value != null) entry.key: entry.value,
+      };
+
+      await _firestore.collection("users").doc(uid).update(payload);
+    } catch (e) {
+      throw Exception("Error updating profile: $e");
     }
   }
 

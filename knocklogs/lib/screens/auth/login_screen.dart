@@ -7,6 +7,7 @@ import '../admin/admin_dashboard.dart';
 import 'register_screen.dart';
 import '../../services/google_auth_service.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/theme_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -143,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 padding: const EdgeInsets.all(12),
                               ),
                             ),
-                            _buildThemeToggle(theme),
+                            const ThemeToggleButton(),
                           ],
                         ),
 
@@ -494,7 +495,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildThemeToggle(ThemeProvider theme) {
+   Widget _buildThemeToggle(ThemeProvider theme) {
     return GestureDetector(
       onTap: theme.toggleTheme,
       child: Container(
@@ -613,7 +614,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildTextField({
+    Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
