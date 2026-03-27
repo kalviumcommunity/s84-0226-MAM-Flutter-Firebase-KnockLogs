@@ -185,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   shape: BoxShape.circle,
                                   gradient: RadialGradient(
                                     colors: [
-                                      theme.primaryColor.withOpacity(0.2),
+                                      theme.primaryColor.withValues(alpha: 0.2),
                                       theme.backgroundColor,
                                     ],
                                   ),
@@ -219,8 +219,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                                                   shape: BoxShape.circle,
                                                   border: Border.all(
                                                     color: theme.primaryColor
-                                                        .withOpacity(
-                                                          (0.3 -
+                                                        .withValues(
+                                                          alpha:
+                                                              (0.3 -
                                                                   (index *
                                                                       0.05)) *
                                                               opacity,
@@ -244,7 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         boxShadow: [
                                           BoxShadow(
                                             color: theme.primaryColor
-                                                .withOpacity(0.3),
+                                                .withValues(alpha: 0.3),
                                             blurRadius: 20,
                                             spreadRadius: 3,
                                           ),
@@ -281,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         'Join KnockLogs community today',
                         style: TextStyle(
                           fontSize: 15,
-                          color: theme.textColor.withOpacity(0.7),
+                          color: theme.textColor.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -344,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: theme.textColor.withOpacity(0.5),
+                            color: theme.textColor.withValues(alpha: 0.5),
                           ),
                           onPressed: () {
                             setState(() {
@@ -412,7 +413,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: theme.textColor.withOpacity(0.8),
+                              color: theme.textColor.withValues(alpha: 0.8),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -422,7 +423,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 10,
                                   offset: const Offset(0, 2),
                                 ),
@@ -435,7 +436,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               decoration: InputDecoration(
                                 prefixIcon: Icon(
                                   Icons.badge_outlined,
-                                  color: theme.textColor.withOpacity(0.6),
+                                  color: theme.textColor.withValues(alpha: 0.6),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -484,14 +485,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 backgroundColor: Colors.transparent,
                                 foregroundColor: theme.textColor,
                                 elevation: 0,
-                                shadowColor: theme.primaryColor.withOpacity(
-                                  0.4,
+                                shadowColor: theme.primaryColor.withValues(
+                                  alpha: 0.4,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 disabledBackgroundColor: theme.textColor
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                               ).copyWith(
                                 backgroundColor: WidgetStateProperty.all(
                                   Colors.transparent,
@@ -540,7 +541,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                           Text(
                             "Already have an account? ",
                             style: TextStyle(
-                              color: theme.textColor.withOpacity(0.6),
+                              color: theme.textColor.withValues(alpha: 0.6),
                               fontSize: 14,
                             ),
                           ),
@@ -582,6 +583,127 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+ 
+  Widget _buildThemeToggle(ThemeProvider theme) {
+    return GestureDetector(
+      onTap: theme.toggleTheme,
+      child: Container(
+        width: 70,
+        height: 35,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: theme.isDarkMode
+                ? [const Color(0xFF2E3A59), const Color(0xFF1A1F2E)]
+                : [const Color(0xFFFFC3A0), const Color(0xFFFFEFBA)],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.orange.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              left: theme.isDarkMode ? 5 : 40,
+              top: 5,
+              child: Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.isDarkMode
+                      ? const Color(0xFFF4E5A1)
+                      : const Color(0xFFFFD700),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.isDarkMode
+                          ? const Color(0xFFF4E5A1).withValues(alpha: 0.5)
+                          : const Color(0xFFFFD700).withValues(alpha: 0.5),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: theme.isDarkMode
+                    ? Stack(
+                        children: [
+                          Positioned(
+                            right: 8,
+                            top: 3,
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF2E3A59),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 3,
+                            top: 8,
+                            child: Container(
+                              width: 4,
+                              height: 4,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF2E3A59),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : null,
+              ),
+            ),
+            if (theme.isDarkMode) ...[
+              Positioned(
+                right: 15,
+                top: 8,
+                child: Icon(
+                  Icons.star,
+                  size: 8,
+                  color: const Color(0xFFF4E5A1).withValues(alpha: 0.7),
+                ),
+              ),
+              Positioned(
+                right: 25,
+                top: 15,
+                child: Icon(
+                  Icons.star,
+                  size: 6,
+                  color: const Color(0xFFF4E5A1).withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+            if (!theme.isDarkMode) ...[
+              Positioned(
+                left: 5,
+                top: 10,
+                child: Container(
+                  width: 12,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+ 
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -601,7 +723,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: theme.textColor.withOpacity(0.8),
+            color: theme.textColor.withValues(alpha: 0.8),
           ),
         ),
         const SizedBox(height: 8),
@@ -611,7 +733,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -625,8 +747,13 @@ class _RegisterScreenState extends State<RegisterScreen>
             style: TextStyle(color: theme.textColor),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(color: theme.textColor.withOpacity(0.4)),
-              prefixIcon: Icon(icon, color: theme.textColor.withOpacity(0.6)),
+              hintStyle: TextStyle(
+                color: theme.textColor.withValues(alpha: 0.4),
+              ),
+              prefixIcon: Icon(
+                icon,
+                color: theme.textColor.withValues(alpha: 0.6),
+              ),
               suffixIcon: suffixIcon,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

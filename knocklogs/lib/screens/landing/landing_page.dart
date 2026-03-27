@@ -177,6 +177,34 @@ class _LandingPageState extends State<LandingPage>
                           ),
                         ),
 
+                 // Enhanced page indicators
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _pages.length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 10,
+                          width: _currentPage == index ? 32 : 10,
+                          decoration: BoxDecoration(
+                            color: _currentPage == index
+                                ? mediumGreen
+                                : mediumGreen.withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(5),
+                            boxShadow: _currentPage == index
+                                ? [
+                                    BoxShadow(
+                                      color: mediumGreen.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ]
+                                : null,
+ 
                         // Modern buttons
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -206,7 +234,7 @@ class _LandingPageState extends State<LandingPage>
                                 theme: theme,
                               ),
                             ],
-                          ),
+                           ),
                         ),
                       ],
                     ),
@@ -220,6 +248,63 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 
+ 
+  Widget _buildThemeToggle(ThemeProvider theme) {
+    return GestureDetector(
+      onTap: theme.toggleTheme,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: theme.isDarkMode
+                ? [
+                    const Color(0xFF2E3A59).withValues(alpha: 0.8),
+                    const Color(0xFF1A1F2E).withValues(alpha: 0.8),
+                  ]
+                : [
+                    mediumGreen.withValues(alpha: 0.1),
+                    darkGreen.withValues(alpha: 0.05),
+                  ],
+          ),
+          border: Border.all(
+            color: theme.isDarkMode
+                ? const Color(0xFFF4E5A1).withValues(alpha: 0.2)
+                : mediumGreen.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.isDarkMode
+                  ? const Color(0xFF2E3A59).withValues(alpha: 0.2)
+                  : mediumGreen.withValues(alpha: 0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: theme.toggleTheme,
+            borderRadius: BorderRadius.circular(14),
+            child: Center(
+              child: Icon(
+                theme.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: theme.isDarkMode ? const Color(0xFFF4E5A1) : mediumGreen,
+                size: 24,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+ 
   Widget _buildModernCard(OnboardingData data, int index, ThemeProvider theme) {
     return AnimatedBuilder(
       animation: _pageController,
@@ -254,17 +339,17 @@ class _LandingPageState extends State<LandingPage>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            data.primaryColor.withOpacity(0.08),
-                            data.secondaryColor.withOpacity(0.04),
+                            data.primaryColor.withValues(alpha: 0.08),
+                            data.secondaryColor.withValues(alpha: 0.04),
                           ],
                         ),
                         border: Border.all(
-                          color: data.primaryColor.withOpacity(0.2),
+                          color: data.primaryColor.withValues(alpha: 0.2),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: data.primaryColor.withOpacity(0.1),
+                            color: data.primaryColor.withValues(alpha: 0.1),
                             blurRadius: 30,
                             spreadRadius: 8,
                             offset: const Offset(0, 12),
@@ -282,7 +367,10 @@ class _LandingPageState extends State<LandingPage>
                               return Transform.translate(
                                 offset: Offset(
                                   0,
-                                  math.sin(_floatController.value * math.pi * 2) * 12,
+                                  math.sin(
+                                        _floatController.value * math.pi * 2,
+                                      ) *
+                                      12,
                                 ),
                                 child: Container(
                                   width: 260,
@@ -291,15 +379,23 @@ class _LandingPageState extends State<LandingPage>
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
                                       colors: [
-                                        data.primaryColor.withOpacity(0.15),
-                                        data.secondaryColor.withOpacity(0.05),
+                                        data.primaryColor.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        data.secondaryColor.withValues(
+                                          alpha: 0.05,
+                                        ),
                                         Colors.transparent,
                                       ],
                                       stops: const [0.0, 0.6, 1.0],
                                     ),
                                   ),
                                   child: Center(
-                                    child: _buildModernIllustration(data, index, theme),
+                                    child: _buildModernIllustration(
+                                      data,
+                                      index,
+                                      theme,
+                                    ),
                                   ),
                                 ),
                               );
@@ -333,7 +429,7 @@ class _LandingPageState extends State<LandingPage>
                               data.description,
                               style: TextStyle(
                                 fontSize: 14.5,
-                                color: theme.textColor.withOpacity(0.65),
+                                color: theme.textColor.withValues(alpha: 0.65),
                                 height: 1.7,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -484,7 +580,7 @@ class _LandingPageState extends State<LandingPage>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: data.primaryColor.withOpacity(0.15),
+                color: data.primaryColor.withValues(alpha: 0.15),
                 width: 2,
               ),
             ),
@@ -494,8 +590,12 @@ class _LandingPageState extends State<LandingPage>
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: orange.withOpacity(0.15), width: 2),
-            ),
+               border: Border.all(
+                color: orange.withValues(alpha: 0.15),
+                width: 2,
+              ),
+               border: Border.all(color: orange.withOpacity(0.15), width: 2),
+             ),
           ),
           // Main shapes
           Transform.translate(
@@ -509,7 +609,7 @@ class _LandingPageState extends State<LandingPage>
                   gradient: LinearGradient(
                     colors: [
                       data.primaryColor,
-                      data.primaryColor.withOpacity(0.7),
+                      data.primaryColor.withValues(alpha: 0.7),
                     ],
                   ),
                   borderRadius: const BorderRadius.only(
@@ -520,7 +620,7 @@ class _LandingPageState extends State<LandingPage>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: data.primaryColor.withOpacity(0.4),
+                      color: data.primaryColor.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: const Offset(-5, 8),
                     ),
@@ -538,8 +638,9 @@ class _LandingPageState extends State<LandingPage>
                 height: 90,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [orange, orange.withOpacity(0.7)],
-                  ),
+                     colors: [orange, orange.withValues(alpha: 0.7)],
+                     colors: [orange, orange.withOpacity(0.7)],
+                   ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(35),
@@ -548,7 +649,7 @@ class _LandingPageState extends State<LandingPage>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: orange.withOpacity(0.4),
+                      color: orange.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: const Offset(5, 8),
                     ),
@@ -568,7 +669,7 @@ class _LandingPageState extends State<LandingPage>
                 color: cream,
                 boxShadow: [
                   BoxShadow(
-                    color: cream.withOpacity(0.6),
+                    color: cream.withValues(alpha: 0.6),
                     blurRadius: 12,
                     spreadRadius: 3,
                   ),
@@ -610,12 +711,13 @@ class _LandingPageState extends State<LandingPage>
             height: 40,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [orange, orange.withOpacity(0.6)],
-              ),
+                 colors: [orange, orange.withValues(alpha: 0.6)],
+                 colors: [orange, orange.withOpacity(0.6)],
+               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: orange.withOpacity(0.6),
+                  color: orange.withValues(alpha: 0.6),
                   blurRadius: 25,
                   spreadRadius: 6,
                 ),
@@ -641,19 +743,28 @@ class _LandingPageState extends State<LandingPage>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
+ 
                       (i == 0
                               ? orange
                               : i == 1
                               ? data.primaryColor
                               : darkGreen)
                           .withOpacity(0.9),
+                       (i == 0
+                              ? orange
+                              : i == 1
+                              ? data.primaryColor
+                              : darkGreen)
+ 
+                          .withValues(alpha: 0.9),
                       (i == 0
                               ? orange
                               : i == 1
                               ? data.primaryColor
                               : darkGreen)
-                          .withOpacity(0.5),
-                    ],
+                          .withValues(alpha: 0.5),
+                           .withOpacity(0.5),
+                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -663,13 +774,14 @@ class _LandingPageState extends State<LandingPage>
                                   : i == 1
                                   ? data.primaryColor
                                   : darkGreen)
-                              .withOpacity(0.35),
-                      blurRadius: 18,
+                               .withValues(alpha: 0.35),
+                               .withOpacity(0.35),
+                       blurRadius: 18,
                       offset: Offset(0, 8 + i * 2),
                     ),
                   ],
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -683,7 +795,7 @@ class _LandingPageState extends State<LandingPage>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: cream.withOpacity(0.3),
+                                color: cream.withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 spreadRadius: 2,
                               ),
@@ -720,11 +832,12 @@ class _LandingPageState extends State<LandingPage>
             : null,
         border: isPrimary
             ? null
-            : Border.all(color: mediumGreen.withOpacity(0.5), width: 2),
-        boxShadow: isPrimary
+             : Border.all(color: mediumGreen.withValues(alpha: 0.5), width: 2),
+             : Border.all(color: mediumGreen.withOpacity(0.5), width: 2),
+         boxShadow: isPrimary
             ? [
                 BoxShadow(
-                  color: mediumGreen.withOpacity(0.35),
+                  color: mediumGreen.withValues(alpha: 0.35),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                   spreadRadius: 1,
@@ -738,9 +851,11 @@ class _LandingPageState extends State<LandingPage>
           onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
           splashColor: isPrimary
-              ? Colors.white.withOpacity(0.1)
+               ? Colors.white.withValues(alpha: 0.1)
+              : mediumGreen.withValues(alpha: 0.1),
+               ? Colors.white.withOpacity(0.1)
               : mediumGreen.withOpacity(0.1),
-          child: Center(
+           child: Center(
             child: Text(
               label,
               style: TextStyle(
