@@ -18,25 +18,36 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+
+  // Controllers
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  // Services
   final AuthService _authService = AuthService();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
+
   final _formKey = GlobalKey<FormState>();
 
   bool isLoading = false;
   bool _obscurePassword = true;
+
+  // Animation controllers
   late AnimationController _animationController;
   late AnimationController _rotationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
+  // Animation constants
+  static const Duration _animationDuration = Duration(milliseconds: 800);
+  static const Duration _rotationDuration = Duration(seconds: 3);
+
   @override
   void initState() {
     super.initState();
-    // Initial entrance animation
+
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: _animationDuration,
       vsync: this,
     );
 
@@ -53,34 +64,42 @@ class _LoginScreenState extends State<LoginScreen>
 
     _animationController.forward();
 
-    // Continuous rotation animation
     _rotationController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: _rotationDuration,
       vsync: this,
     )..repeat();
   }
 
+  // MEMORY LEAK FIX
   @override
   void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
     _animationController.dispose();
     _rotationController.dispose();
     super.dispose();
   }
 
+  // LOGIN FUNCTION
   void loginUser() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     String? role = await _authService.login(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
 
+    if (role != null) {
+      _navigateBasedOnRole(role);
+    } else {
+      _showError("Login Failed");
+    }
+  }
+
+  // CLEAN NAVIGATION FUNCTION
+  void _navigateBasedOnRole(String role) {
     if (role == "resident") {
       Navigator.pushReplacement(
         context,
@@ -97,10 +116,13 @@ class _LoginScreenState extends State<LoginScreen>
         MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Login Failed")));
+      _showError("Login Failed");
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -124,14 +146,14 @@ class _LoginScreenState extends State<LoginScreen>
             child: SafeArea(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Header with back button and theme toggle
+
+                        // Back button + Theme toggle
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -139,8 +161,6 @@ class _LoginScreenState extends State<LoginScreen>
                               onPressed: () => Navigator.pop(context),
                               icon: const Icon(Icons.arrow_back_rounded),
                               style: IconButton.styleFrom(
-                                backgroundColor: theme.cardColor,
-                                foregroundColor: theme.textColor,
                                 padding: const EdgeInsets.all(12),
                               ),
                             ),
@@ -257,19 +277,18 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
 
                         // Title
-                        Text(
+                        const Text(
                           'Welcome Back',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: theme.textColor,
                           ),
-                          textAlign: TextAlign.center,
                         ),
 
                         const SizedBox(height: 8),
 
-                        Text(
+                        const Text(
                           'Sign in to continue to KnockLogs',
                           style: TextStyle(
                             fontSize: 15,
@@ -280,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 40),
 
-                        // Email Field
+                        // Email
                         _buildTextField(
                           controller: emailController,
                           label: 'Email',
@@ -292,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 16),
 
-                        // Password Field
+                        // Password
                         _buildTextField(
                           controller: passwordController,
                           label: 'Password',
@@ -317,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 32),
 
-                        // Login Button
+                        // Login button
                         SizedBox(
                           height: 56,
                           child: ElevatedButton(
@@ -379,85 +398,11 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 24),
 
-                        // Divider
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: theme.textColor.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                'OR',
-                                style: TextStyle(
-                                  color: theme.textColor.withValues(alpha: 0.6),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: theme.textColor.withValues(alpha: 0.3),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Google Sign In Button
-                        SizedBox(
-                          height: 56,
-                          child: OutlinedButton.icon(
-                            onPressed: isLoading ? null : _signInWithGoogle,
-                            icon: Image.asset(
-                              'assests/google_logo.png',
-                              height: 24,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.g_mobiledata_rounded,
-                                  size: 28,
-                                  color: theme.textColor.withValues(alpha: 0.7),
-                                );
-                              },
-                            ),
-                            label: Text(
-                              'Continue with Google',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: theme.textColor.withValues(alpha: 0.7),
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: theme.cardColor,
-                              side: BorderSide(
-                                color: theme.textColor.withValues(alpha: 0.3),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Register Link
+                        // Register link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              "Don't have an account? ",
-                              style: TextStyle(
-                                color: theme.textColor.withValues(alpha: 0.6),
-                                fontSize: 14,
-                              ),
-                            ),
+                            const Text("Don't have an account? "),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -467,19 +412,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 );
                               },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  color: theme.primaryColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: const Text('Sign Up'),
                             ),
                           ],
                         ),
@@ -495,126 +428,8 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-   Widget _buildThemeToggle(ThemeProvider theme) {
-    return GestureDetector(
-      onTap: theme.toggleTheme,
-      child: Container(
-        width: 70,
-        height: 35,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: theme.isDarkMode
-                ? [const Color(0xFF2E3A59), const Color(0xFF1A1F2E)]
-                : [const Color(0xFFFFC3A0), const Color(0xFFFFEFBA)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.isDarkMode
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.orange.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              left: theme.isDarkMode ? 5 : 40,
-              top: 5,
-              child: Container(
-                width: 25,
-                height: 25,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.isDarkMode
-                      ? const Color(0xFFF4E5A1)
-                      : const Color(0xFFFFD700),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.isDarkMode
-                          ? const Color(0xFFF4E5A1).withValues(alpha: 0.5)
-                          : const Color(0xFFFFD700).withValues(alpha: 0.5),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: theme.isDarkMode
-                    ? Stack(
-                        children: [
-                          Positioned(
-                            right: 8,
-                            top: 3,
-                            child: Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 3,
-                            top: 8,
-                            child: Container(
-                              width: 4,
-                              height: 4,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF2E3A59),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : null,
-              ),
-            ),
-            if (theme.isDarkMode) ...[
-              Positioned(
-                right: 15,
-                top: 8,
-                child: Icon(
-                  Icons.star,
-                  size: 8,
-                  color: const Color(0xFFF4E5A1).withValues(alpha: 0.7),
-                ),
-              ),
-              Positioned(
-                right: 25,
-                top: 15,
-                child: Icon(
-                  Icons.star,
-                  size: 6,
-                  color: const Color(0xFFF4E5A1).withValues(alpha: 0.5),
-                ),
-              ),
-            ],
-            if (!theme.isDarkMode) ...[
-              Positioned(
-                left: 5,
-                top: 10,
-                child: Container(
-                  width: 12,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-    Widget _buildTextField({
+  // Reusable TextField
+  Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -678,42 +493,5 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ],
     );
-  }
-
-  void _signInWithGoogle() async {
-    setState(() => isLoading = true);
-    try {
-      print("🔵 Starting Google Sign-In...");
-      final user = await _googleAuthService.signInWithGoogle();
-
-      print("✅ User: $user");
-      if (user != null && mounted) {
-        print("✅ Google Login Successful! Navigating...");
-
-        // Default to resident dashboard (GoogleAuthService sets role as "resident")
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ResidentDashboard()),
-        );
-      } else {
-        print("⚠️ User is null");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Google Sign-In cancelled")),
-          );
-        }
-      }
-    } catch (e) {
-      print("❌ Google Sign-In Error: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
-    }
   }
 }
