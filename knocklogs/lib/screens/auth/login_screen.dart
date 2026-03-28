@@ -18,36 +18,25 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
-
-  // Controllers
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  // Services
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
-
   final _formKey = GlobalKey<FormState>();
 
   bool isLoading = false;
   bool _obscurePassword = true;
-
-  // Animation controllers
   late AnimationController _animationController;
   late AnimationController _rotationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
-  // Animation constants
-  static const Duration _animationDuration = Duration(milliseconds: 800);
-  static const Duration _rotationDuration = Duration(seconds: 3);
-
   @override
   void initState() {
     super.initState();
-
+    // Initial entrance animation
     _animationController = AnimationController(
-      duration: _animationDuration,
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -64,42 +53,34 @@ class _LoginScreenState extends State<LoginScreen>
 
     _animationController.forward();
 
+    // Continuous rotation animation
     _rotationController = AnimationController(
-      duration: _rotationDuration,
+      duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
   }
 
-  // MEMORY LEAK FIX
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
     _animationController.dispose();
     _rotationController.dispose();
     super.dispose();
   }
 
-  // LOGIN FUNCTION
   void loginUser() async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
 
     String? role = await _authService.login(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
 
-    setState(() => isLoading = false);
+    setState(() {
+      isLoading = false;
+    });
 
-    if (role != null) {
-      _navigateBasedOnRole(role);
-    } else {
-      _showError("Login Failed");
-    }
-  }
-
-  // CLEAN NAVIGATION FUNCTION
-  void _navigateBasedOnRole(String role) {
     if (role == "resident") {
       Navigator.pushReplacement(
         context,
@@ -116,13 +97,10 @@ class _LoginScreenState extends State<LoginScreen>
         MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
     } else {
-      _showError("Login Failed");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Login Failed")));
     }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -146,14 +124,14 @@ class _LoginScreenState extends State<LoginScreen>
             child: SafeArea(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+                  padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-
-                        // Back button + Theme toggle
+                        // Header with back button and theme toggle
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -161,6 +139,8 @@ class _LoginScreenState extends State<LoginScreen>
                               onPressed: () => Navigator.pop(context),
                               icon: const Icon(Icons.arrow_back_rounded),
                               style: IconButton.styleFrom(
+                                backgroundColor: theme.cardColor,
+                                foregroundColor: theme.textColor,
                                 padding: const EdgeInsets.all(12),
                               ),
                             ),
@@ -186,9 +166,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
                                       colors: [
-                                        theme.primaryColor.withValues(
-                                          alpha: 0.2,
-                                        ),
+                                        theme.primaryColor.withOpacity(0.2),
                                         theme.backgroundColor,
                                       ],
                                     ),
@@ -212,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen>
                                                 shape: BoxShape.circle,
                                                 border: Border.all(
                                                   color: theme.primaryColor
-                                                      .withValues(alpha: 0.3),
+                                                      .withOpacity(0.3),
                                                   width: 2,
                                                 ),
                                               ),
@@ -234,9 +212,7 @@ class _LoginScreenState extends State<LoginScreen>
                                                         shape: BoxShape.circle,
                                                         color: theme
                                                             .primaryColor
-                                                            .withValues(
-                                                              alpha: 0.5,
-                                                            ),
+                                                            .withOpacity(0.5),
                                                       ),
                                                     ),
                                                   ),
@@ -256,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           boxShadow: [
                                             BoxShadow(
                                               color: theme.primaryColor
-                                                  .withValues(alpha: 0.3),
+                                                  .withOpacity(0.3),
                                               blurRadius: 30,
                                               spreadRadius: 5,
                                             ),
@@ -277,29 +253,30 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
 
                         // Title
-                        const Text(
+                        Text(
                           'Welcome Back',
-                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
+                            color: theme.textColor,
                           ),
+                          textAlign: TextAlign.center,
                         ),
 
                         const SizedBox(height: 8),
 
-                        const Text(
+                        Text(
                           'Sign in to continue to KnockLogs',
                           style: TextStyle(
                             fontSize: 15,
-                            color: theme.textColor.withValues(alpha: 0.7),
+                            color: theme.textColor.withOpacity(0.7),
                           ),
                           textAlign: TextAlign.center,
                         ),
 
                         const SizedBox(height: 40),
 
-                        // Email
+                        // Email Field
                         _buildTextField(
                           controller: emailController,
                           label: 'Email',
@@ -311,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 16),
 
-                        // Password
+                        // Password Field
                         _buildTextField(
                           controller: passwordController,
                           label: 'Password',
@@ -324,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen>
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: theme.textColor.withValues(alpha: 0.5),
+                              color: theme.textColor.withOpacity(0.5),
                             ),
                             onPressed: () {
                               setState(() {
@@ -336,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 32),
 
-                        // Login button
+                        // Login Button
                         SizedBox(
                           height: 56,
                           child: ElevatedButton(
@@ -346,14 +323,14 @@ class _LoginScreenState extends State<LoginScreen>
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: theme.textColor,
                                   elevation: 0,
-                                  shadowColor: theme.primaryColor.withValues(
-                                    alpha: 0.4,
+                                  shadowColor: theme.primaryColor.withOpacity(
+                                    0.4,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   disabledBackgroundColor: theme.textColor
-                                      .withValues(alpha: 0.3),
+                                      .withOpacity(0.3),
                                 ).copyWith(
                                   backgroundColor: WidgetStateProperty.all(
                                     Colors.transparent,
@@ -398,11 +375,85 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 24),
 
-                        // Register link
+                        // Divider
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: theme.textColor.withOpacity(0.3),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                'OR',
+                                style: TextStyle(
+                                  color: theme.textColor.withOpacity(0.6),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: theme.textColor.withOpacity(0.3),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Google Sign In Button
+                        SizedBox(
+                          height: 56,
+                          child: OutlinedButton.icon(
+                            onPressed: isLoading ? null : _signInWithGoogle,
+                            icon: Image.asset(
+                              'assets/google_logo.png',
+                              height: 24,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.g_mobiledata_rounded,
+                                  size: 28,
+                                  color: theme.textColor.withOpacity(0.7),
+                                );
+                              },
+                            ),
+                            label: Text(
+                              'Continue with Google',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: theme.textColor.withOpacity(0.7),
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: theme.cardColor,
+                              side: BorderSide(
+                                color: theme.textColor.withOpacity(0.3),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Register Link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Don't have an account? "),
+                            Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                color: theme.textColor.withOpacity(0.6),
+                                fontSize: 14,
+                              ),
+                            ),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -412,7 +463,19 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 );
                               },
-                              child: const Text('Sign Up'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  color: theme.primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -428,7 +491,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // Reusable TextField
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -447,7 +509,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: theme.textColor.withValues(alpha: 0.8),
+            color: theme.textColor.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 8),
@@ -457,7 +519,7 @@ class _LoginScreenState extends State<LoginScreen>
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -470,13 +532,8 @@ class _LoginScreenState extends State<LoginScreen>
             style: TextStyle(color: theme.textColor),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(
-                color: theme.textColor.withValues(alpha: 0.4),
-              ),
-              prefixIcon: Icon(
-                icon,
-                color: theme.textColor.withValues(alpha: 0.6),
-              ),
+              hintStyle: TextStyle(color: theme.textColor.withOpacity(0.4)),
+              prefixIcon: Icon(icon, color: theme.textColor.withOpacity(0.6)),
               suffixIcon: suffixIcon,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -494,4 +551,41 @@ class _LoginScreenState extends State<LoginScreen>
       ],
     );
   }
-}
+
+  void _signInWithGoogle() async {
+    setState(() => isLoading = true);
+    try {
+      print("🔵 Starting Google Sign-In...");
+      final user = await _googleAuthService.signInWithGoogle();
+
+      print("✅ User: $user");
+      if (user != null && mounted) {
+        print("✅ Google Login Successful! Navigating...");
+
+        // Default to resident dashboard (GoogleAuthService sets role as "resident")
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ResidentDashboard()),
+        );
+      } else {
+        print("⚠️ User is null");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Google Sign-In cancelled")),
+          );
+        }
+      }
+    } catch (e) {
+      print("❌ Google Sign-In Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+}  
