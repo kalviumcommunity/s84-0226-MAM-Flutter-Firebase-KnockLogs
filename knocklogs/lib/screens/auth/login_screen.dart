@@ -170,6 +170,112 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 24),
 
+                        // Animated Illustration
+                        AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            return FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: ScaleTransition(
+                                scale: _scaleAnimation,
+                                child: Container(
+                                  height: 180,
+                                  width: 180,
+                                  margin: const EdgeInsets.only(bottom: 32),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        theme.primaryColor.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        theme.backgroundColor,
+                                      ],
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Outer rotating circle with continuous animation
+                                      AnimatedBuilder(
+                                        animation: _rotationController,
+                                        builder: (context, child) {
+                                          return Transform.rotate(
+                                            angle:
+                                                _rotationController.value *
+                                                2 *
+                                                3.14159,
+                                            child: Container(
+                                              height: 160,
+                                              width: 160,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: theme.primaryColor
+                                                      .withValues(alpha: 0.3),
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Stack(
+                                                children: List.generate(
+                                                  8,
+                                                  (index) => Positioned(
+                                                    top: index % 2 == 0
+                                                        ? 10
+                                                        : null,
+                                                    bottom: index % 2 == 1
+                                                        ? 10
+                                                        : null,
+                                                    left: (index ~/ 2) * 40.0,
+                                                    child: Container(
+                                                      width: 8,
+                                                      height: 8,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: theme
+                                                            .primaryColor
+                                                            .withValues(
+                                                              alpha: 0.5,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      // Center icon
+                                      Container(
+                                        height: 100,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          color: theme.cardColor,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: theme.primaryColor
+                                                  .withValues(alpha: 0.3),
+                                              blurRadius: 30,
+                                              spreadRadius: 5,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          Icons.shield_outlined,
+                                          size: 50,
+                                          color: theme.primaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
                         // Title
                         const Text(
                           'Welcome Back',
@@ -184,6 +290,10 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const Text(
                           'Sign in to continue to KnockLogs',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: theme.textColor.withValues(alpha: 0.7),
+                          ),
                           textAlign: TextAlign.center,
                         ),
 
@@ -214,6 +324,7 @@ class _LoginScreenState extends State<LoginScreen>
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
+                              color: theme.textColor.withValues(alpha: 0.5),
                             ),
                             onPressed: () {
                               setState(() {
@@ -230,9 +341,58 @@ class _LoginScreenState extends State<LoginScreen>
                           height: 56,
                           child: ElevatedButton(
                             onPressed: isLoading ? null : loginUser,
-                            child: isLoading
-                                ? const CircularProgressIndicator()
-                                : const Text('Sign In'),
+                            style:
+                                ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: theme.textColor,
+                                  elevation: 0,
+                                  shadowColor: theme.primaryColor.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  disabledBackgroundColor: theme.textColor
+                                      .withValues(alpha: 0.3),
+                                ).copyWith(
+                                  backgroundColor: WidgetStateProperty.all(
+                                    Colors.transparent,
+                                  ),
+                                ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    theme.primaryColor,
+                                    theme.accentColor,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: isLoading
+                                    ? SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                theme.textColor,
+                                              ),
+                                        ),
+                                      )
+                                    : Text(
+                                        'Sign In',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.textColor,
+                                        ),
+                                      ),
+                              ),
+                            ),
                           ),
                         ),
 
@@ -282,16 +442,53 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: theme.textColor.withValues(alpha: 0.8),
+          ),
+        ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon),
-            suffixIcon: suffixIcon,
+        Container(
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            style: TextStyle(color: theme.textColor),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: theme.textColor.withValues(alpha: 0.4),
+              ),
+              prefixIcon: Icon(
+                icon,
+                color: theme.textColor.withValues(alpha: 0.6),
+              ),
+              suffixIcon: suffixIcon,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: theme.cardColor,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+            ),
           ),
         ),
       ],
