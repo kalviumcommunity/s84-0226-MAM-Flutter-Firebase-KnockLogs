@@ -26,7 +26,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     final palette = AdminPalette.of(context);
     return Scaffold(
-      backgroundColor: palette.background,
+      backgroundColor: palette.background ,
       appBar: _buildAppBar(palette),
       body: IndexedStack(
         index: _selectedTab,
