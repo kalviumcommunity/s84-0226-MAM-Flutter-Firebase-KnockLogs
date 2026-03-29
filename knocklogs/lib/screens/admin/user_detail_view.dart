@@ -3,6 +3,21 @@ import 'package:intl/intl.dart';
 import '../../services/admin_service.dart';
 import 'admin_palette.dart';
 
+/// UserDetailView
+/// ------------------------------------------------------------
+/// This screen displays detailed information about a selected user
+/// in the admin panel.
+///
+/// Features included:
+/// - View personal details (name, email, phone, flat number)
+/// - View account information (user ID and registration date)
+/// - Approve pending users
+/// - Reject pending users
+/// - Delete approved/rejected users
+///
+/// This widget receives user data as a Map and updates the UI
+/// dynamically based on the user's role and status.
+
 class UserDetailView extends StatefulWidget {
   final Map<String, dynamic> user;
 
