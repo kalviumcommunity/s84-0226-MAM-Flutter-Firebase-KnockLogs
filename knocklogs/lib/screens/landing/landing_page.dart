@@ -85,7 +85,7 @@ class _LandingPageState extends State<LandingPage>
                           gradient: LinearGradient(
                             colors: [mediumGreen, darkGreen],
                             begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                            end: Alignment.bottomRight ,
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
