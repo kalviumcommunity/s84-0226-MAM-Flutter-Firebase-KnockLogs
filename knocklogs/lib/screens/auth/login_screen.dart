@@ -411,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen>
                           child: OutlinedButton.icon(
                             onPressed: isLoading ? null : _signInWithGoogle,
                             icon: Image.asset(
-                              'assests/google_logo.png',
+                              'assets/google_logo.png',
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
                                 return Icon(
@@ -588,4 +588,4 @@ class _LoginScreenState extends State<LoginScreen>
       }
     }
   }
-}
+}  

@@ -18,7 +18,7 @@ class ThemeProvider extends ChangeNotifier {
   Color get darkSecondary => darkGreen;
   Color get darkAccent => orange;
   Color get darkText => cream;
-  Color get darkTextSecondary => cream.withOpacity(0.6);
+  Color get darkTextSecondary => cream.withValues(alpha: 0.6);
 
   // Light theme colors
   Color get lightBackground => const Color(0xFFFAF8F3); // Soft cream background

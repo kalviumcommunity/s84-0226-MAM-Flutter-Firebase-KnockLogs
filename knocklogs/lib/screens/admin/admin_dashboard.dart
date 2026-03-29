@@ -4,12 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/admin_service.dart';
+
 import '../../providers/analytics_provider.dart';
+
+
+import 'user_detail_view.dart';
+import '../landing/landing_page.dart';
+
 import '../../widgets/theme_toggle.dart';
 import '../auth/login_screen.dart';
 import 'admin_palette.dart';
 import 'user_detail_view.dart';
 import 'analytics_tab.dart';
+
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -118,6 +125,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
         const SizedBox(width: 16),
       ],
+
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: borderGray, height: 1),
+      );
     );
   }
 
@@ -128,6 +140,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(fontWeight: FontWeight.w600, color: palette.text),
         ),
+
       ),
       child: NavigationBar(
         backgroundColor: palette.surface,
@@ -167,6 +180,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final user = _auth.currentUser;
     showGeneralDialog(
       context: context,
+
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _auth.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LandingPage()),
+                  (Route<dynamic> route) => false,
+                );
+              }
+            },
+            child: const Text(
+              "Logout",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
+          ),
+        ],
+
       barrierDismissible: true,
       barrierLabel: 'Profile panel',
       barrierColor: Colors.black54,
@@ -358,6 +399,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         },
                       ),
               ),
+
             ),
           ),
         );
@@ -536,6 +578,35 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
+
+        color: cardWhite,
+        border: Border(top: BorderSide(color: borderGray, width: 1)),
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: cardWhite,
+        selectedItemColor: primaryIndigo,
+        unselectedItemColor: textLight,
+        currentIndex: _selectedTab,
+        onTap: (index) {
+          setState(() => _selectedTab = index);
+          // Refresh the lists when switching tabs
+          if (index == 1) {
+            _guardsTabKey.currentState?._loadGuards();
+          } else if (index == 2) {
+            _residentsTabKey.currentState?._loadResidents();
+          }
+        },
+        elevation: 0,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pending_actions),
+            label: "Pending",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.security), label: "Guards"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Residents"),
+        ],
+      ),
+
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -592,6 +663,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ],
         );
       },
+
     );
   }
 }
@@ -662,50 +734,85 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
     }
   }
 
-  void _approveUser(String userId, String name) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final palette = AdminPalette.of(context);
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+  void _approveUser(String userId, String name, AdminPalette palette) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: const Text("Approve Request"),
+        content: Text("Approve $name?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
           ),
-          title: const Text("Approve Request"),
-          content: Text("Approve $name?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _adminService.approveUser(userId);
+                Navigator.pop(context);
+                await _refreshAll();
+                _showSuccess("User approved successfully", palette);
+              } catch (e) {
+                Navigator.pop(context);
+                _showError("Error approving user: $e", palette);
+              }
+            },
+            child: Text(
+              "Approve",
+              style: TextStyle(color: palette.success),
             ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _adminService.approveUser(userId);
-                  Navigator.pop(context);
-                  await _refreshAll();
-                  _showSuccess("User approved successfully", palette);
-                } catch (e) {
-                  Navigator.pop(context);
-                  _showError("Error approving user: $e", palette);
-                }
-              },
-              child: Text("Approve", style: TextStyle(color: palette.success)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+          ),
+        ],
+      );
+    },
+  );
+}
   void _rejectUser(String userId, String name) {
     showDialog(
       context: context,
+
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15),
+        ),
+        title: const Text("Reject Request"),
+        content: Text("Reject $name?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _adminService.rejectUser(userId);
+                Navigator.pop(context);
+                _loadPendingRequests();
+                _showSuccess("User rejected successfully");
+              } catch (e) {
+                Navigator.pop(context);
+                _showError("Error rejecting user: $e");
+              }
+            },
+            child: const Text(
+              "Reject",
+              style: TextStyle(color: Color(0xFFEF4444)),
+            ),
+          ),
+        ],
+      ),
+    ),
+  },
+
       builder: (context) {
         final palette = AdminPalette.of(context);
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
+
           ),
           title: const Text("Reject Request"),
           content: Text("Reject $name?"),
@@ -873,6 +980,16 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
         color: palette.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
+ 
+          color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+
           color: palette.warning.withValues(alpha: 0.35),
           width: 1.5,
         ),
@@ -881,6 +998,7 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
             color: Colors.black.withValues(alpha: palette.isDark ? 0.2 : 0.06),
             blurRadius: 12,
             offset: const Offset(0, 6),
+
           ),
         ],
       ),
@@ -892,7 +1010,13 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
               children: [
                 Container(
                   decoration: BoxDecoration(
+ 
+                    color: isGuard
+                        ? const Color(0xFF6366F1).withValues(alpha: 0.1)
+                        : const Color(0xFF06B6D4).withValues(alpha: 0.1),
+ 
                     color: roleColor.withValues(alpha: 0.12),
+ 
                     borderRadius: BorderRadius.circular(10),
                   ),
                   padding: const EdgeInsets.all(10),
@@ -939,7 +1063,11 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                 ),
                 Container(
                   decoration: BoxDecoration(
+ 
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
+ 
                     color: palette.warning.withValues(alpha: 0.15),
+ 
                     borderRadius: BorderRadius.circular(6),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -1053,6 +1181,11 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
+          Icon(
+            icon,
+            size: 80,
+            color: const Color(0xFF6B7280).withValues(alpha: 0.3),
           Row(
             children: [
               Expanded(
@@ -1077,6 +1210,7 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
                 child: Icon(kpi.icon, color: kpi.color, size: 18),
               ),
             ],
+ 
           ),
           const SizedBox(height: 12),
           Text(
@@ -1577,8 +1711,8 @@ class _GuardsTabState extends State<GuardsTab> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height - 200,
                         child: _buildEmptyState(
-                          palette,
-                          "No guards found",
+                            palette,
+                           "No guards found",
                           Icons.person_off,
                         ),
                       ),
@@ -1604,8 +1738,9 @@ class _GuardsTabState extends State<GuardsTab> {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: palette.border, width: 1.5),
-      ),
+         border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+         border: Border.all(color: palette.border, width: 1.5),
+       ),
       child: TextField(
         controller: _searchController,
         style: TextStyle(color: palette.text),
@@ -1626,10 +1761,16 @@ class _GuardsTabState extends State<GuardsTab> {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(10),
+         border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+
         border: Border.all(color: palette.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: palette.isDark ? 0.2 : 0.05),
+
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1638,9 +1779,12 @@ class _GuardsTabState extends State<GuardsTab> {
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
-          backgroundColor: palette.primary.withValues(alpha: 0.1),
+
+          backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.1),
+          child: const Icon(Icons.security, color: Color(0xFF6366F1)),
+           backgroundColor: palette.primary.withValues(alpha: 0.1),
           child: Icon(Icons.security, color: palette.primary),
-        ),
+         ),
         title: Text(
           user['name'] ?? 'Unknown',
           style: TextStyle(
@@ -1651,8 +1795,9 @@ class _GuardsTabState extends State<GuardsTab> {
         ),
         subtitle: Text(
           user['email'] ?? 'No email',
-          style: TextStyle(color: palette.textSecondary, fontSize: 13),
-        ),
+           style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+           style: TextStyle(color: palette.textSecondary, fontSize: 13),
+         ),
         trailing: PopupMenuButton(
           itemBuilder: (context) => [
             PopupMenuItem(
@@ -1665,8 +1810,13 @@ class _GuardsTabState extends State<GuardsTab> {
               },
             ),
             PopupMenuItem(
+               child: const Text(
+                "Delete",
+                style: TextStyle(color: Color(0xFFEF4444)),
+              ),
+ 
               child: Text("Delete", style: TextStyle(color: palette.danger)),
-              onTap: () {
+               onTap: () {
                 Future.delayed(
                   const Duration(milliseconds: 300),
                   () => _deleteGuard(user['id'], user['name']),
@@ -1694,7 +1844,9 @@ class _GuardsTabState extends State<GuardsTab> {
           Icon(
             icon,
             size: 80,
-            color: palette.textSecondary.withValues(alpha: 0.3),
+             color: const Color(0xFF6B7280).withValues(alpha: 0.3),
+             color: palette.textSecondary.withValues(alpha: 0.3),
+  main
           ),
           const SizedBox(height: 20),
           Text(
@@ -1828,7 +1980,9 @@ class _ResidentsTabState extends State<ResidentsTab> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height - 200,
                         child: _buildEmptyState(
+
                           palette,
+ 
                           "No residents found",
                           Icons.person_off,
                         ),
@@ -1855,8 +2009,9 @@ class _ResidentsTabState extends State<ResidentsTab> {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: palette.border, width: 1.5),
-      ),
+         border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+         border: Border.all(color: palette.border, width: 1.5),
+       ),
       child: TextField(
         controller: _searchController,
         style: TextStyle(color: palette.text),
@@ -1877,11 +2032,16 @@ class _ResidentsTabState extends State<ResidentsTab> {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: palette.border, width: 1),
+  Err_fixed
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+         border: Border.all(color: palette.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: palette.isDark ? 0.2 : 0.05),
-            blurRadius: 8,
+             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -1889,9 +2049,11 @@ class _ResidentsTabState extends State<ResidentsTab> {
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
-          backgroundColor: palette.accent.withValues(alpha: 0.1),
+           backgroundColor: const Color(0xFF06B6D4).withValues(alpha: 0.1),
+          child: const Icon(Icons.home, color: Color(0xFF06B6D4)),
+           backgroundColor: palette.accent.withValues(alpha: 0.1),
           child: Icon(Icons.home, color: palette.accent),
-        ),
+         ),
         title: Text(
           user['name'] ?? 'Unknown',
           style: TextStyle(
@@ -1906,17 +2068,22 @@ class _ResidentsTabState extends State<ResidentsTab> {
             const SizedBox(height: 2),
             Text(
               user['email'] ?? 'No email',
-              style: TextStyle(color: palette.textSecondary, fontSize: 13),
-            ),
+               style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+               style: TextStyle(color: palette.textSecondary, fontSize: 13),
+             ),
             const SizedBox(height: 2),
             Text(
               "Phone: ${user['phone'] ?? 'N/A'}",
-              style: TextStyle(color: palette.textSecondary, fontSize: 12),
-            ),
+               style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+               style: TextStyle(color: palette.textSecondary, fontSize: 12),
+             ),
             const SizedBox(height: 2),
             Text(
               "Flat: ${user['flatNo'] ?? 'N/A'}",
+               style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+ 
               style: TextStyle(color: palette.textSecondary, fontSize: 12),
+ 
             ),
           ],
         ),
@@ -1932,7 +2099,14 @@ class _ResidentsTabState extends State<ResidentsTab> {
               },
             ),
             PopupMenuItem(
+ 
+              child: const Text(
+                "Delete",
+                style: TextStyle(color: Color(0xFFEF4444)),
+              ),
+ 
               child: Text("Delete", style: TextStyle(color: palette.danger)),
+ 
               onTap: () {
                 Future.delayed(
                   const Duration(milliseconds: 300),
@@ -1961,7 +2135,11 @@ class _ResidentsTabState extends State<ResidentsTab> {
           Icon(
             icon,
             size: 80,
+ 
+            color: const Color(0xFF6B7280).withValues(alpha: 0.3),
+
             color: palette.textSecondary.withValues(alpha: 0.3),
+
           ),
           const SizedBox(height: 20),
           Text(
