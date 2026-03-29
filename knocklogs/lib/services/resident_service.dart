@@ -2,6 +2,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
+
+/// Service class that handles all resident-related operations.
+///
+/// Responsibilities include:
+/// - Fetching resident profile information
+/// - Generating and storing QR sessions
+/// - Logging check-in and check-out activity
+/// - Managing visitor QR codes
+/// - Updating resident profile details
+/// - Fetching access logs and summaries.
+
 class ResidentService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
