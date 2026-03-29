@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../services/admin_service.dart';
+import '../../providers/analytics_provider.dart';
 import '../../widgets/theme_toggle.dart';
 import '../auth/login_screen.dart';
 import 'admin_palette.dart';
 import 'user_detail_view.dart';
+import 'analytics_tab.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -34,6 +37,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           const PendingRequestsTab(),
           GuardsTab(key: _guardsTabKey),
           ResidentsTab(key: _residentsTabKey),
+          const AnalyticsTab(),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(palette),
@@ -148,6 +152,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Residents',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.analytics_outlined),
+            selectedIcon: Icon(Icons.analytics),
+            label: 'Analytics',
           ),
         ],
       ),
@@ -624,6 +633,17 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
       final pendingCount = await _adminService.getPendingRequestsCount();
       final visitorsToday = await _adminService.getVisitorsTodayCount();
       final visitorWeek = await _adminService.getVisitorEntriesLast7Days();
+
+      // Update AnalyticsProvider with real data
+      if (mounted) {
+        final analyticsProvider = context.read<AnalyticsProvider>();
+        analyticsProvider.updateData(
+          visitorWeek,
+          visitorsToday,
+          approvedResidents,
+          pendingCount,
+        );
+      }
 
       setState(() {
         _pendingRequests = pendingRequests;
