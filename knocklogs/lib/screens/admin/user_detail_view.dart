@@ -3,21 +3,6 @@ import 'package:intl/intl.dart';
 import '../../services/admin_service.dart';
 import 'admin_palette.dart';
 
-/// UserDetailView
-/// ------------------------------------------------------------
-/// This screen displays detailed information about a selected user
-/// in the admin panel.
-///
-/// Features included:
-/// - View personal details (name, email, phone, flat number)
-/// - View account information (user ID and registration date)
-/// - Approve pending users
-/// - Reject pending users
-/// - Delete approved/rejected users
-///
-/// This widget receives user data as a Map and updates the UI
-/// dynamically based on the user's role and status.
-
 class UserDetailView extends StatefulWidget {
   final Map<String, dynamic> user;
 
@@ -179,9 +164,7 @@ class _UserDetailViewState extends State<UserDetailView> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-           child: Container(color: const Color(0xFFE5E7EB), height: 1),
-           child: Container(color: palette.border, height: 1),
- 
+          child: Container(color: palette.border, height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -275,15 +258,7 @@ class _UserDetailViewState extends State<UserDetailView> {
 
     return Container(
       decoration: BoxDecoration(
-         color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-         color: palette.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: palette.border, width: 1),
         boxShadow: [
@@ -291,7 +266,7 @@ class _UserDetailViewState extends State<UserDetailView> {
             color: Colors.black.withOpacity(palette.isDark ? 0.2 : 0.08),
             blurRadius: 18,
             offset: const Offset(0, 8),
-           ),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(24),
@@ -299,12 +274,8 @@ class _UserDetailViewState extends State<UserDetailView> {
         children: [
           CircleAvatar(
             radius: 50,
-             backgroundColor: isGuard
-                ? const Color(0xFF6366F1).withValues(alpha: 0.1)
-                : const Color(0xFF06B6D4).withValues(alpha: 0.1),
- 
             backgroundColor: roleColor.withOpacity(0.12),
-             child: Icon(
+            child: Icon(
               isGuard ? Icons.security : Icons.home,
               size: 50,
               color: roleColor,
@@ -322,12 +293,8 @@ class _UserDetailViewState extends State<UserDetailView> {
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-               color: isGuard
-                  ? const Color(0xFF6366F1).withValues(alpha: 0.1)
-                  : const Color(0xFF06B6D4).withValues(alpha: 0.1),
- 
               color: roleColor.withOpacity(0.12),
-               borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
@@ -359,25 +326,9 @@ class _UserDetailViewState extends State<UserDetailView> {
 
     return Container(
       decoration: BoxDecoration(
-         color: isApproved
-            ? const Color(0xFF10B981).withValues(alpha: 0.1)
-            : status.toLowerCase() == 'pending'
-            ? const Color(0xFFFFD700).withValues(alpha: 0.1)
-            : const Color(0xFFEF4444).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isApproved
-              ? const Color(0xFF10B981)
-              : status.toLowerCase() == 'pending'
-              ? const Color(0xFFB8860B)
-              : const Color(0xFFEF4444),
-          width: 1,
-        ),
- 
         color: badgeColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: badgeColor, width: 1),
-  
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -386,19 +337,11 @@ class _UserDetailViewState extends State<UserDetailView> {
           Icon(
             isApproved
                 ? Icons.check_circle
-                 : status.toLowerCase() == 'pending'
-                ? Icons.schedule
-                : Icons.cancel,
-            color: isApproved
-                ? const Color(0xFF10B981)
-                : status.toLowerCase() == 'pending'
-                ? const Color(0xFFB8860B)
-                : const Color(0xFFEF4444),
-                 : isPending
+                : isPending
                 ? Icons.schedule
                 : Icons.cancel,
             color: badgeColor,
-             size: 16,
+            size: 16,
           ),
           const SizedBox(width: 8),
           Text(
@@ -406,13 +349,8 @@ class _UserDetailViewState extends State<UserDetailView> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-               color: isApproved
-                  ? const Color(0xFF10B981)
-                  : status.toLowerCase() == 'pending'
-                  ? const Color(0xFFB8860B)
-                  : const Color(0xFFEF4444),
-               color: badgeColor,
-               letterSpacing: 0.5,
+              color: badgeColor,
+              letterSpacing: 0.5,
             ),
           ),
         ],
@@ -467,24 +405,17 @@ class _UserDetailViewState extends State<UserDetailView> {
   }) {
     return Container(
       decoration: BoxDecoration(
-         color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-         color: palette.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: palette.border, width: 1),
-       ),
+      ),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
-               color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
- 
               color: palette.primary.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
- 
             ),
             padding: const EdgeInsets.all(10),
             child: Icon(icon, color: palette.primary, size: 20),
@@ -537,14 +468,10 @@ class _UserDetailViewState extends State<UserDetailView> {
 
     return Container(
       decoration: BoxDecoration(
-         color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
- 
         color: palette.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: palette.border, width: 1),
-       ),
+      ),
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,11 +510,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                       horizontal: 10,
                       vertical: 6,
                     ),
-                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                      child: Text(
+                    child: Text(
                       user['id']?.substring(0, 8) ?? 'N/A',
                       style: TextStyle(
                         fontSize: 11,

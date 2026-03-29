@@ -12,18 +12,10 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:ui' as ui;
-import '../../services/resident_service.dart';
-import '../landing/landing_page.dart';
-
-
 import '../../providers/theme_provider.dart';
 import '../../services/resident_service.dart';
 import '../auth/login_screen.dart';
 import '../../widgets/theme_toggle.dart';
-
 
 class ResidentDashboard extends StatefulWidget {
   const ResidentDashboard({super.key});
@@ -267,23 +259,12 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
           ),
           TextButton(
             onPressed: () async {
-
-              Navigator.pop(context);
-              await _auth.signOut();
-              if (mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LandingPage()),
-                  (Route<dynamic> route) => false,
-                );
-              }
-
               await _auth.signOut();
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
-
             },
             child: const Text("Logout", style: TextStyle(color: dangerRed)),
           ),
@@ -377,9 +358,8 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               );
             },
             style: TextButton.styleFrom(
-               backgroundColor: primaryIndigo.withValues(alpha: 0.1),
-               backgroundColor: primaryIndigo.withOpacity(0.12),
-             ),
+              backgroundColor: primaryIndigo.withOpacity(0.12),
+            ),
             child: Text(
               "Save",
               style: TextStyle(
@@ -470,26 +450,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
       _showErrorSnackbar("Error updating profile: $e");
     }
   }
- 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgLight,
-      appBar: _buildAppBar(),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? _buildErrorWidget()
-          : _buildContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _generateNewQR,
-        backgroundColor: primaryIndigo,
-        child: const Icon(Icons.qr_code),
-      ),
-    );
-  }
 
- 
   AppBar _buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -923,25 +884,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                     ],
                   ),
                 ),
-               )
-            else
-              const SizedBox(
-                height: 250,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            const SizedBox(height: 20),
-            // QR Data Display Section for Manual Testing
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: bgLight,
-                border: Border.all(color: textLight, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-               ],
+              ],
             ),
             const SizedBox(height: 14),
             Text(
@@ -1033,7 +976,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                     ),
                   ],
                 ),
-                 children: [
+                children: [
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
@@ -1054,29 +997,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                             ),
                           ),
                         ),
-                       ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(text: _currentQRData ?? ""),
-                          );
-                          _showSuccessSnackbar(
-                            "QR data copied! Paste it in Guard Dashboard",
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: primaryIndigo,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(
-                            Icons.content_copy,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                         const SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         IconButton(
                           onPressed: () {
                             Clipboard.setData(
@@ -1089,7 +1010,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                           icon: const Icon(Icons.copy_rounded),
                           color: primaryIndigo,
                           tooltip: "Copy session payload",
-                         ),
+                        ),
                       ],
                     ),
                   ),
@@ -1229,10 +1150,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
               decoration: BoxDecoration(
                 color: _residentInfo!['status'] == 'approved'
-                     ? successGreen.withValues(alpha: 0.1)
-                    : warningorange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                     ? successGreen.withOpacity(0.1)
+                    ? successGreen.withOpacity(0.1)
                     : warningorange.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
@@ -1240,7 +1158,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                       ? successGreen.withOpacity(0.35)
                       : warningorange.withOpacity(0.35),
                 ),
-               ),
+              ),
               child: Row(
                 children: [
                   Icon(
@@ -1305,54 +1223,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
       ),
     );
   }
- 
-  Widget _buildDetailRowWithEdit(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: primaryIndigo),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: textLight,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: textDark,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () => _showEditPhoneDialog(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: primaryIndigo.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(Icons.edit, size: 16, color: primaryIndigo),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
- 
   Widget _buildTodaysSummaryCard() {
     DateTime? checkInTime = _todaysSummary['check_in_time'];
     DateTime? checkOutTime = _todaysSummary['check_out_time'];
@@ -1447,9 +1318,9 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Column(
         children: [
@@ -1550,7 +1421,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                   return Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: dangerRed.withValues(alpha: 0.1),
+                      color: dangerRed.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -1565,11 +1436,9 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: textLight.withValues(alpha: 0.1),
+                      color: textLight.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: textLight.withValues(alpha: 0.2),
-                      ),
+                      border: Border.all(color: textLight.withOpacity(0.2)),
                     ),
                     child: Center(
                       child: Text(
@@ -1592,10 +1461,10 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: primaryIndigo.withValues(alpha: 0.05),
+                        color: primaryIndigo.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: primaryIndigo.withValues(alpha: 0.2),
+                          color: primaryIndigo.withOpacity(0.2),
                           width: 1,
                         ),
                       ),
@@ -1636,12 +1505,8 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                           color: warningorange.withValues(
-                                            alpha: 0.2,
-                                          ),
- 
                                           color: warningorange.withOpacity(0.2),
-                                           borderRadius: BorderRadius.circular(
+                                          borderRadius: BorderRadius.circular(
                                             4,
                                           ),
                                         ),
@@ -1840,9 +1705,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
           style: TextStyle(color: textDark),
           decoration: InputDecoration(
             hintText: hint,
-             prefixIcon: Icon(icon, size: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-             hintStyle: TextStyle(color: textLight),
+            hintStyle: TextStyle(color: textLight),
             prefixIcon: Icon(icon, size: 18, color: textLight),
             filled: true,
             fillColor: backgroundColor.withOpacity(
@@ -1860,7 +1723,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: primaryIndigo.withOpacity(0.6)),
             ),
-             contentPadding: const EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 10,
             ),
@@ -1973,7 +1836,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: primaryIndigo.withValues(alpha: 0.1),
+                    color: primaryIndigo.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1993,7 +1856,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
-                          backgroundColor: textLight.withValues(alpha: 0.1),
+                          backgroundColor: textLight.withOpacity(0.1),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -2280,8 +2143,8 @@ KnockLogs - Secure Entry Management''';
                         height: compact ? 44 : 50,
                         decoration: BoxDecoration(
                           color: isGranted
-                              ? successGreen.withValues(alpha: 0.2)
-                              : dangerRed.withValues(alpha: 0.2),
+                              ? successGreen.withOpacity(0.2)
+                              : dangerRed.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -2323,15 +2186,11 @@ KnockLogs - Secure Entry Management''';
                                 ),
                                 decoration: BoxDecoration(
                                   color: log['type'] == 'IN'
-                                       ? successGreen.withValues(alpha: 0.2)
-                                      : const Color(
-                                          0xFFEC4899,
-                                        ).withValues(alpha: 0.2),
-                                       ? successGreen.withOpacity(0.2)
+                                      ? successGreen.withOpacity(0.2)
                                       : const Color(
                                           0xFFEC4899,
                                         ).withOpacity(0.2),
-                                   borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   log['type'].toString().toUpperCase(),
@@ -2368,7 +2227,6 @@ KnockLogs - Secure Entry Management''';
     );
   }
 }
- 
 
 class _SectionHeader extends StatelessWidget {
   final IconData icon;
@@ -2462,4 +2320,3 @@ class _PrimaryActionButton extends StatelessWidget {
     );
   }
 }
- 
