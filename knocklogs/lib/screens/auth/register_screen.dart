@@ -66,6 +66,16 @@ class _RegisterScreenState extends State<RegisterScreen>
     super.dispose();
   }
 
+/// Registers a new user using Firebase Authentication and
+/// stores additional user details in Firestore.
+///
+/// Steps performed:
+/// 1. Validate form inputs
+/// 2. Create user using email & password
+/// 3. Store user data (name, phone, role, flat number, status)
+/// 4. Show success/error message
+/// 5. Navigate back to login screen
+
   Future<void> registerUser() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -703,7 +713,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
- 
+/// Reusable custom text field used across the registration form.
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
