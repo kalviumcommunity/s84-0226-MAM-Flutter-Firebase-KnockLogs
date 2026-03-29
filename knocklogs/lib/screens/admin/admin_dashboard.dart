@@ -123,7 +123,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(color: borderGray, height: 1),
-
+      );
     );
   }
 
@@ -193,6 +193,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
             child: const Text(
               "Logout",
               style: TextStyle(color: Color(0xFFEF4444)),
+            ),
+          ),
+        ],
 
       barrierDismissible: true,
       barrierLabel: 'Profile panel',
@@ -709,70 +712,50 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
     }
   }
 
-  void _approveUser(String userId, String name) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final palette = AdminPalette.of(context);
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+  void _approveUser(String userId, String name, AdminPalette palette) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: const Text("Approve Request"),
+        content: Text("Approve $name?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
           ),
-
           TextButton(
             onPressed: () async {
               try {
                 await _adminService.approveUser(userId);
                 Navigator.pop(context);
-                _loadPendingRequests();
-                _showSuccess("User approved successfully");
+                await _refreshAll();
+                _showSuccess("User approved successfully", palette);
               } catch (e) {
                 Navigator.pop(context);
-                _showError("Error approving user: $e");
+                _showError("Error approving user: $e", palette);
               }
             },
-            child: const Text(
+            child: Text(
               "Approve",
-              style: TextStyle(color: Color(0xFF10B981)),
+              style: TextStyle(color: palette.success),
             ),
           ),
         ],
-      ),
-
-          title: const Text("Approve Request"),
-          content: Text("Approve $name?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _adminService.approveUser(userId);
-                  Navigator.pop(context);
-                  await _refreshAll();
-                  _showSuccess("User approved successfully", palette);
-                } catch (e) {
-                  Navigator.pop(context);
-                  _showError("Error approving user: $e", palette);
-                }
-              },
-              child: Text("Approve", style: TextStyle(color: palette.success)),
-            ),
-          ],
-        );
-      },
-
-    );
-  }
-
+      );
+    },
+  );
+}
   void _rejectUser(String userId, String name) {
     showDialog(
       context: context,
 
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15),
+        ),
         title: const Text("Reject Request"),
         content: Text("Reject $name?"),
         actions: [
@@ -796,6 +779,11 @@ class _PendingRequestsTabState extends State<PendingRequestsTab> {
               "Reject",
               style: TextStyle(color: Color(0xFFEF4444)),
             ),
+          ),
+        ],
+      ),
+    ),
+  },
 
       builder: (context) {
         final palette = AdminPalette.of(context);
