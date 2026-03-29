@@ -23,6 +23,16 @@ class _CounterScreenState extends State<CounterScreen> {
     _navigateToRoleScreen();
   }
 
+/// Determines which dashboard screen to open based on
+/// the currently authenticated user's role stored in Firestore.
+///
+/// Flow:
+/// 1. Check if a user is logged in
+/// 2. Fetch user document from Firestore
+/// 3. Read the role (resident / guard / admin)
+/// 4. Navigate to the correct dashboard
+/// 5. Redirect to landing page if anything fails.
+
   Future<void> _navigateToRoleScreen() async {
     try {
       User? user = _auth.currentUser;
