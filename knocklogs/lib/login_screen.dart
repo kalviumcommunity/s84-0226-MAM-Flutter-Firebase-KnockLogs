@@ -15,7 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
   final AuthService _authService = AuthService();
-  bool _isLoading = false;
+  bool _isLoading = false;   // Controls loading state while login is in progress
+
 
   @override
   void dispose() {
@@ -23,6 +24,15 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+
+  /// Handles user authentication using Google Sign-In.
+/// 
+/// Steps:
+/// 1. Starts Google authentication
+/// 2. Checks if the user is successfully logged in
+/// 3. Navigates to the next screen if authentication succeeds
+/// 4. Shows an error message if authentication fails.
+
 
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
@@ -69,6 +79,14 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
+/// Handles login using email and password.
+/// 
+/// Steps:
+/// 1. Validates that email and password are not empty
+/// 2. Calls the authentication service
+/// 3. Navigates to the next screen if login succeeds
+/// 4. Shows an error message if login fails.
 
   Future<void> _handleEmailLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -134,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
             // Password TextField
             TextField(
-              controller: _passwordController,
+              controller: _passwordController,0 qw0-
               enabled: !_isLoading,
               obscureText: true,
               decoration: const InputDecoration(
