@@ -259,7 +259,7 @@ class _GuardDashboardState extends State<GuardDashboard> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(
-                backgroundColor: dangerRed.withAlpha(26),
+                backgroundColor: dangerRed.withAlpha(26) ,
               ),
               child: Text(
                 "CONFIRM DENIAL",
