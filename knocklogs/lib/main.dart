@@ -23,38 +23,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AnalyticsProvider()),
       ],
-
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (snapshot.hasData && snapshot.data != null) {
-              // User is authenticated, show role-based dashboard
-              return const CounterScreen();
-            }
-
-            // Not authenticated, show landing
-            return const LandingPage();
-          },
-        ),
-
-
       child: Consumer<ThemeProvider>(
         builder: (context, theme, _) {
           return MaterialApp(
@@ -76,10 +49,24 @@ class MyApp extends StatelessWidget {
               ),
             ),
             themeMode: theme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const LandingPage(),
+            home: StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (snapshot.hasData && snapshot.data != null) {
+                  return const CounterScreen();
+                }
+
+                return const LandingPage();
+              },
+            ),
           );
         },
-
       ),
     );
   }
