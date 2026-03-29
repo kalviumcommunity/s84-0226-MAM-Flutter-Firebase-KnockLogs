@@ -1355,7 +1355,7 @@ class _ResidentDashboardState extends State<ResidentDashboard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: cardWhite,
       child: Padding(
-        padding: EdgeInsets.all(compact ? 16 : 24),
+        padding: EdgeInsets.all(compact ? 16 : 24) ,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
