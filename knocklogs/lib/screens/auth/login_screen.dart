@@ -9,6 +9,13 @@ import '../../services/google_auth_service.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/theme_toggle.dart';
 
+// Login screen for user authentication
+// Supports:
+// 1. Email & Password login
+// 2. Google Sign-In
+// 3. Role-based navigation (Resident / Guard / Admin)
+// 4. Theme support using Provider
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -16,23 +23,24 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+
 class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
-  final emailController = TextEditingController();
+  final emailController = TextEditingController();  // Controllers used to get user input from email and password fields
   final passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
+  final AuthService _authService = AuthService();   // Services used for authentication (Email login + Google Sign-In)
   final GoogleAuthService _googleAuthService = GoogleAuthService();
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();  // Form key used for validating the login form
 
-  bool isLoading = false;
+  bool isLoading = false;    // Controls loading indicator while login is in progress
   bool _obscurePassword = true;
-  late AnimationController _animationController;
+  late AnimationController _animationController;   // Animation controllers used for login screen animations
   late AnimationController _rotationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
   @override
-  void initState() {
+  void initState() {           // Initialize animations when the login screen loads
     super.initState();
     // Initial entrance animation
     _animationController = AnimationController(
@@ -67,7 +75,10 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  void loginUser() async {
+// Function to log in the user using email and password
+// Navigates user to dashboard based on their role
+
+  void loginUser() async {         
     setState(() {
       isLoading = true;
     });
@@ -104,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {      // Builds the complete UI of the login screen
     return Consumer<ThemeProvider>(
       builder: (context, theme, child) {
         return Scaffold(
